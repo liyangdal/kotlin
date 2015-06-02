@@ -555,9 +555,6 @@ public class InlineCodegen extends CallGenerator {
         Set<String> result = new HashSet<String>();
 
         if (lambdaOrFun != null) {
-            if (lambdaOrFun instanceof JetFunctionLiteral) {
-                lambdaOrFun = lambdaOrFun.getParent();
-            }
             Name label = LabelResolver.INSTANCE.getLabelNameIfAny(lambdaOrFun);
             if (label != null) {
                 result.add(label.asString());

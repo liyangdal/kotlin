@@ -63,6 +63,10 @@ public class LabelResolver {
             return ((JetLabeledExpression) element).getLabelNameAsName();
         }
 
+        if (element instanceof JetFunctionLiteral) {
+            return getLabelNameIfAny(element.getParent());
+        }
+
         if (element instanceof JetFunctionLiteralExpression) {
             return getLabelForFunctionalExpression((JetExpression) element);
         }
