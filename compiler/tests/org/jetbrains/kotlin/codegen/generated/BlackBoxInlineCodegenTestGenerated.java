@@ -487,6 +487,12 @@ public class BlackBoxInlineCodegenTestGenerated extends AbstractBlackBoxInlineCo
             doTestMultiFileWithInlineCheck(fileName);
         }
 
+        @TestMetadata("nonLocalReturnToLambda.1.kt")
+        public void testNonLocalReturnToLambda() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxInline/nonLocalReturns/nonLocalReturnToLambda.1.kt");
+            doTestMultiFileWithInlineCheck(fileName);
+        }
+
         @TestMetadata("propertyAccessors.1.kt")
         public void testPropertyAccessors() throws Exception {
             String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxInline/nonLocalReturns/propertyAccessors.1.kt");
