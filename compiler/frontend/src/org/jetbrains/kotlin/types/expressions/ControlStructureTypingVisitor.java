@@ -532,7 +532,15 @@ public class ControlStructureTypingVisitor extends ExpressionTypingVisitor {
 
         if (expression.getTargetLabel() == null) {
             assert parentDeclaration != null;
-            DeclarationDescriptor declarationDescriptor = context.trace.get(DECLARATION_TO_DESCRIPTOR, parentDeclaration);
+            DeclarationDescriptor declarationDescriptor = null;
+
+            while (parentDeclaration instanceof JetMultiDeclaration) {
+                //TODO: It's hacking fix for KT-5100: Strange "Return is not allowed here" for multi-declaration initializer with elvis expression
+                parentDeclaration = PsiTreeUtil.getParentOfType(parentDeclaration, JetDeclaration.class);
+            }
+
+            declarationDescriptor = context.trace.get(DECLARATION_TO_DESCRIPTOR, parentDeclaration);
+
             Pair<FunctionDescriptor, PsiElement> containingFunInfo =
                     BindingContextUtils.getContainingFunctionSkipFunctionLiterals(declarationDescriptor, false);
             FunctionDescriptor containingFunctionDescriptor = containingFunInfo.getFirst();
