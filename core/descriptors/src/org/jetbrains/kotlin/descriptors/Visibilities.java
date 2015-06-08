@@ -105,7 +105,14 @@ public class Visibilities {
             ClassDescriptor fromClass = DescriptorUtils.getParentOfType(from, ClassDescriptor.class, false);
             if (fromClass == null) return false;
             if (DescriptorUtils.isSubclass(fromClass, classDescriptor)) {
-                return true;
+                if (receiver == ReceiverValue.IRRELEVANT_RECEIVER) {
+                    return true;
+                }
+                if (receiver instanceof ClassReceiver) {
+                    return ((ClassReceiver) receiver).getDeclarationDescriptor().getOriginal() == classDescriptor.getOriginal();
+                }
+                //process futher?
+                return false;
             }
             return isVisible(receiver, what, fromClass.getContainingDeclaration());
         }
