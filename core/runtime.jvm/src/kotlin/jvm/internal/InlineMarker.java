@@ -29,4 +29,12 @@ public class InlineMarker {
     public static void goToTryCatchBlockEnd() {
 
     }
+
+    public static void finallyStart(int deep) {
+
+    }
+
+    public static void finallyEnd(int deep) {
+
+    }
 }

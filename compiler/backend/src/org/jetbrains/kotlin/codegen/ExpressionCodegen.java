@@ -129,6 +129,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
 
     private int myLastLineNumber = -1;
     private boolean shouldMarkLineNumbers = true;
+    private int finallyDeep = 0;
 
     public ExpressionCodegen(
             @NotNull MethodVisitor mv,
@@ -1793,6 +1794,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             @Nullable Label afterReturnLabel
     ) {
         if (finallyBlockStackElement != null) {
+            finallyDeep++;
             assert finallyBlockStackElement.gaps.size() % 2 == 0 : "Finally block gaps are inconsistent";
 
             BlockStackElement topOfStack = blockStackElements.pop();
@@ -1802,19 +1804,23 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             Label finallyStart = new Label();
             v.mark(finallyStart);
             finallyBlockStackElement.addGapLabel(finallyStart);
-
+            if (context.isInlineFunction() || context.isInliningLambda()) {
+                InlineCodegenUtil.generateFinallyMarker(v, finallyDeep, true);
+            }
             //noinspection ConstantConditions
             gen(jetTryExpression.getFinallyBlock().getFinalExpression(), Type.VOID_TYPE);
+
+            if (context.isInlineFunction() || context.isInliningLambda()) {
+                InlineCodegenUtil.generateFinallyMarker(v, finallyDeep, false);
+            }
         }
 
         if (tryCatchBlockEnd != null) {
-            if (context.isInlineFunction()) {
-                InlineCodegenUtil.generateGoToTryCatchBlockEndMarker(v);
-            }
             v.goTo(tryCatchBlockEnd);
         }
 
         if (finallyBlockStackElement != null) {
+            finallyDeep--;
             Label finallyEnd = afterReturnLabel != null ? afterReturnLabel : new Label();
             if (afterReturnLabel == null) {
                 v.mark(finallyEnd);
@@ -1845,6 +1851,10 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
 
         Label afterReturnLabel = new Label();
         generateFinallyBlocksIfNeeded(returnType, afterReturnLabel);
+
+        //if (context.isInlineFunction()) {
+        //    InlineCodegenUtil.generateTryBlockReturnOrJumpMarker(v, finallyDeep);
+        //}
 
         if (isNonLocalReturn) {
             InlineCodegenUtil.generateGlobalReturnFlag(v, nonLocalReturn.labelName);

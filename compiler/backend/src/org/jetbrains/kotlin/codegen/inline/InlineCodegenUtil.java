@@ -77,7 +77,8 @@ public class InlineCodegenUtil {
     public static final String INLINE_MARKER_CLASS_NAME = "kotlin/jvm/internal/InlineMarker";
     public static final String INLINE_MARKER_BEFORE_METHOD_NAME = "beforeInlineCall";
     public static final String INLINE_MARKER_AFTER_METHOD_NAME = "afterInlineCall";
-    public static final String INLINE_MARKER_GOTO_TRY_CATCH_BLOCK_END = "goToTryCatchBlockEnd";
+    public static final String INLINE_MARKER_FINALLY_START = "finallyStart";
+    public static final String INLINE_MARKER_FINALLY_END = "finallyEnd";
 
     @Nullable
     public static SMAPAndMethodNode getMethodNode(
@@ -321,7 +322,9 @@ public class InlineCodegenUtil {
 
     //marked return could be either non-local or local in case of labeled lambda self-returns
     public static boolean isMarkedReturn(@NotNull AbstractInsnNode returnIns) {
-        assert isReturnOpcode(returnIns.getOpcode()) : "Should be called on return instruction, but " + returnIns;
+        if (!isReturnOpcode(returnIns.getOpcode())) {
+            return false;
+        }
         AbstractInsnNode globalFlag = returnIns.getPrevious();
         return globalFlag instanceof MethodInsnNode && NON_LOCAL_RETURN.equals(((MethodInsnNode)globalFlag).owner);
     }
@@ -356,7 +359,7 @@ public class InlineCodegenUtil {
     }
 
     static boolean isLineNumberOrLabel(@Nullable AbstractInsnNode node) {
-        return node instanceof LineNumberNode || node instanceof LabelNode;
+        return node instanceof LineNumberNode || node instanceof LabelNode || node instanceof FrameNode;
     }
 
     @NotNull
@@ -405,16 +408,39 @@ public class InlineCodegenUtil {
         }
     }
 
-    public static void generateGoToTryCatchBlockEndMarker(@NotNull InstructionAdapter v) {
-        v.invokestatic(INLINE_MARKER_CLASS_NAME, INLINE_MARKER_GOTO_TRY_CATCH_BLOCK_END, "()V", false);
+    public static void generateFinallyMarker(@NotNull InstructionAdapter v, int deep, boolean start) {
+        v.iconst(deep);
+        v.invokestatic(INLINE_MARKER_CLASS_NAME, start? INLINE_MARKER_FINALLY_START : INLINE_MARKER_FINALLY_END, "(I)V", false);
     }
 
-    public static boolean isGoToTryCatchBlockEnd(@NotNull AbstractInsnNode node) {
-        if (!(node.getPrevious() instanceof MethodInsnNode)) return false;
-        MethodInsnNode previous = (MethodInsnNode) node.getPrevious();
-        return node.getOpcode() == Opcodes.GOTO &&
-               INLINE_MARKER_CLASS_NAME.equals(previous.owner) &&
-               INLINE_MARKER_GOTO_TRY_CATCH_BLOCK_END.equals(previous.name);
+    public static boolean isFinallyEnd(@NotNull AbstractInsnNode node) {
+        return isFinallyMarker(node, INLINE_MARKER_FINALLY_END);
+    }
+
+    public static boolean isFinallyStart(@NotNull AbstractInsnNode node) {
+        return isFinallyMarker(node, INLINE_MARKER_FINALLY_START);
+    }
+
+    public static boolean isFinallyMarker(@Nullable AbstractInsnNode node) {
+        return isFinallyMarker(node, INLINE_MARKER_FINALLY_END) || isFinallyMarker(node, INLINE_MARKER_FINALLY_START);
+    }
+
+    public static boolean isFinallyMarker(@Nullable AbstractInsnNode node, String name) {
+        if (!(node instanceof MethodInsnNode)) return false;
+        MethodInsnNode method = (MethodInsnNode) node;
+        return INLINE_MARKER_CLASS_NAME.equals(method.owner) && name.equals(method.name);
+    }
+
+    public static int getConstant(AbstractInsnNode ins) {
+        int opcode = ins.getOpcode();
+        Integer value;
+        if (opcode >= Opcodes.ICONST_0 && opcode <= Opcodes.ICONST_5) {
+            value = opcode - Opcodes.ICONST_0;
+        } else {
+            LdcInsnNode index = (LdcInsnNode) ins;
+            value = (Integer) index.cst;
+        }
+        return value;
     }
 
     public static class LabelTextifier extends Textifier {
