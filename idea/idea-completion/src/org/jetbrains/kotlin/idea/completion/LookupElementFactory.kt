@@ -98,7 +98,7 @@ public class LookupElementFactory(
     }
 
     public fun createLookupElementForJavaClass(psiClass: PsiClass): LookupElement {
-        var element = LookupElementBuilder.create(psiClass, psiClass.getName()).withInsertHandler(KotlinClassInsertHandler)
+        var element = LookupElementBuilder.create(psiClass, psiClass.getName()!!).withInsertHandler(KotlinClassInsertHandler)
 
         val typeParams = psiClass.getTypeParameters()
         if (typeParams.isNotEmpty()) {
