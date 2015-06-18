@@ -1,0 +1,13 @@
+package test
+
+public abstract class Season {
+    public constructor Season()
+
+    internal final class Cold : test.Season {
+        public constructor Cold()
+    }
+
+    internal final class Warm : test.Season {
+        public constructor Warm()
+    }
+}
