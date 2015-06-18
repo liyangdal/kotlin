@@ -48,6 +48,7 @@ import java.util.ArrayList
 import org.jetbrains.annotations.TestOnly
 import org.jetbrains.jps.incremental.storage.PathStringDescriptor
 import org.jetbrains.kotlin.config.IncrementalCompilation
+import org.jetbrains.kotlin.jps.build.KotlinBuilder
 import org.jetbrains.kotlin.utils.Printer
 import java.io.DataInputStream
 
@@ -77,7 +78,11 @@ class CacheFormatVersion(targetDataRoot: File) {
         val versionNumber = file.readText().toInt()
         val expectedVersionNumber = actualCacheFormatVersion()
 
-        return versionNumber != expectedVersionNumber
+        if (versionNumber != expectedVersionNumber) {
+            KotlinBuilder.LOG.info("Incompatible incremental cache version, expected $expectedVersionNumber, actual $versionNumber")
+            return true
+        }
+        return false
     }
 
     fun saveIfNeeded() {
@@ -147,7 +152,7 @@ public class IncrementalCacheImpl(targetDataRoot: File) : StorageOwner, Incremen
         dirtyOutputClassesMap.notDirty(className.getInternalName())
         sourceFiles.forEach { sourceToClassesMap.addSourceToClass(it, className) }
 
-        return when {
+        val decision = when {
             header.isCompatiblePackageFacadeKind() ->
                 getRecompilationDecision(
                         protoChanged = protoMap.put(className, BitEncoding.decodeBytes(header.annotationData)),
@@ -179,6 +184,10 @@ public class IncrementalCacheImpl(targetDataRoot: File) : StorageOwner, Incremen
                 DO_NOTHING
             }
         }
+        if (decision != DO_NOTHING) {
+            KotlinBuilder.LOG.debug("$decision because $className is changed")
+        }
+        return decision
     }
 
     public fun clearCacheForRemovedClasses(): RecompilationDecision {
@@ -191,6 +200,9 @@ public class IncrementalCacheImpl(targetDataRoot: File) : StorageOwner, Incremen
                     constantsChanged = internalClassName in constantsMap,
                     inlinesChanged = internalClassName in inlineFunctionsMap
             )
+            if (newDecision != DO_NOTHING) {
+                KotlinBuilder.LOG.debug("$newDecision because $internalClassName is removed")
+            }
 
             recompilationDecision = recompilationDecision.merge(newDecision)
 
@@ -204,7 +216,10 @@ public class IncrementalCacheImpl(targetDataRoot: File) : StorageOwner, Incremen
     }
 
     public override fun getObsoletePackageParts(): Collection<String> {
-        return dirtyOutputClassesMap.getDirtyOutputClasses().filter { packagePartMap.isPackagePart(JvmClassName.byInternalName(it)) }
+        val obsoletePackageParts =
+                dirtyOutputClassesMap.getDirtyOutputClasses().filter { packagePartMap.isPackagePart(JvmClassName.byInternalName(it)) }
+        KotlinBuilder.LOG.debug("Obsolete package parts: ${obsoletePackageParts.toList()}")
+        return obsoletePackageParts
     }
 
     public override fun getPackageData(fqName: String): ByteArray? {
