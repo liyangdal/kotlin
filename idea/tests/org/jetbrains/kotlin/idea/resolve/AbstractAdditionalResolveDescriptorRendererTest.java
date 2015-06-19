@@ -34,7 +34,8 @@ public abstract class AbstractAdditionalResolveDescriptorRendererTest extends Ab
         if (declaration instanceof JetClassInitializer || JetPsiUtil.isLocal(declaration)) {
             ResolveElementCache resolveElementCache = new ResolveElementCache(resolveSession, getProject());
             //noinspection ConstantConditions
-            return resolveElementCache.resolveToElement(declaration, BodyResolveMode.FULL).get(BindingContext.DECLARATION_TO_DESCRIPTOR, declaration);
+            return resolveElementCache.resolveToElement(declaration, BodyResolveMode.FULL).get(BindingContext.DECLARATION_TO_DESCRIPTOR,
+                                                                                               declaration);
         }
         return resolveSession.resolveToDescriptor(declaration);
     }

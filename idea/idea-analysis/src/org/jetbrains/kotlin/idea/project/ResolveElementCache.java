@@ -28,21 +28,26 @@ import org.jetbrains.kotlin.idea.stubindex.JetProbablyNothingFunctionShortNameIn
 import org.jetbrains.kotlin.idea.stubindex.JetProbablyNothingPropertyShortNameIndex;
 import org.jetbrains.kotlin.psi.JetElement;
 import org.jetbrains.kotlin.psi.JetFile;
+import org.jetbrains.kotlin.psi.JetNamedFunction;
 import org.jetbrains.kotlin.resolve.AdditionalCheckerProvider;
 import org.jetbrains.kotlin.resolve.BindingTrace;
+import org.jetbrains.kotlin.resolve.DelegatingBindingTrace;
+import org.jetbrains.kotlin.resolve.ResolveTaskManager;
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode;
 import org.jetbrains.kotlin.resolve.lazy.ElementResolver;
 import org.jetbrains.kotlin.resolve.lazy.ProbablyNothingCallableNames;
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession;
 import org.jetbrains.kotlin.storage.LazyResolveStorageManager;
+import org.jetbrains.kotlin.storage.LockBasedLazyResolveStorageManager;
 import org.jetbrains.kotlin.storage.MemoizedFunctionToNotNull;
+import org.jetbrains.kotlin.types.DynamicTypesSettings;
 
 import java.util.Collection;
 
-public class ResolveElementCache extends ElementResolver {
+public class ResolveElementCache extends ElementResolver implements ResolveTaskManager {
     private final Project project;
     private final CachedValue<MemoizedFunctionToNotNull<JetElement, BindingTrace>> additionalResolveCache;
-
+    
     public ResolveElementCache(ResolveSession resolveSession, Project project) {
         super(resolveSession);
         this.project = project;
@@ -91,6 +96,12 @@ public class ResolveElementCache extends ElementResolver {
 
     @NotNull
     @Override
+    public DynamicTypesSettings getDynamicTypesSettings(@NotNull JetFile jetFile) {
+        return TargetPlatformDetector.getPlatform(jetFile).getDynamicTypesSettings();
+    }
+
+    @NotNull
+    @Override
     protected ProbablyNothingCallableNames probablyNothingCallableNames() {
         return new ProbablyNothingCallableNames() {
             @NotNull
@@ -106,5 +117,12 @@ public class ResolveElementCache extends ElementResolver {
                 return JetProbablyNothingPropertyShortNameIndex.getInstance().getAllKeys(project);
             }
         };
+    }
+
+    @NotNull
+    @Override
+    public DelegatingBindingTrace resolveFunctionBody(@NotNull JetNamedFunction function) {
+        return (DelegatingBindingTrace)(
+                ((LockBasedLazyResolveStorageManager.LockProtectedTrace) getElementAdditionalResolve(function)).getTrace());
     }
 }
