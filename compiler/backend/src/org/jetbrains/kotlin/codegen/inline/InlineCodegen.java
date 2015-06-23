@@ -664,13 +664,13 @@ public class InlineCodegen extends CallGenerator {
 
         DefaultProcessor processor = new DefaultProcessor(intoNode, offsetForFinallyLocalVar);
 
-        int curFinallyDeep = 0;
+        int curFinallyDepth = 0;
         AbstractInsnNode curInstr = intoNode.instructions.getFirst();
         while (curInstr != null) {
             processor.processInstruction(curInstr, true);
             if (InlineCodegenUtil.isFinallyStart(curInstr)) {
-                //TODO deep index calc could be more precise
-                curFinallyDeep = getConstant(curInstr.getPrevious());
+                //TODO depth index calc could be more precise
+                curFinallyDepth = getConstant(curInstr.getPrevious());
             }
 
             MethodInliner.PointForExternalFinallyBlocks extension = extensionPoints.get(curInstr);
@@ -683,7 +683,7 @@ public class InlineCodegen extends CallGenerator {
                 ExpressionCodegen finallyCodegen =
                         new ExpressionCodegen(finallyNode, codegen.getFrameMap(), codegen.getReturnType(),
                                               codegen.getContext(), codegen.getState(), codegen.getParentCodegen());
-                finallyCodegen.addBlockStackElementsForNonLocalReturns(codegen.getBlockStackElements(), curFinallyDeep);
+                finallyCodegen.addBlockStackElementsForNonLocalReturns(codegen.getBlockStackElements(), curFinallyDepth);
 
                 FrameMap frameMap = finallyCodegen.getFrameMap();
                 FrameMap.Mark mark = frameMap.mark();
