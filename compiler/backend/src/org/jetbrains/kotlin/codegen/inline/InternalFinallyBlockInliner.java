@@ -144,6 +144,7 @@ public class InternalFinallyBlockInliner extends CoveringTryCatchNodeProcessor {
             AbstractInsnNode markedReturn = curIns;
             AbstractInsnNode instrInsertFinallyBefore = markedReturn.getPrevious();
             AbstractInsnNode nextPrev = instrInsertFinallyBefore.getPrevious().getPrevious();
+            assert markedReturn.getNext() instanceof LabelNode : "Label should be occurred after non-local return";
             LabelNode newFinallyEnd = (LabelNode) markedReturn.getNext();
             Type nonLocalReturnType = InlineCodegenUtil.getReturnType(markedReturn.getOpcode());
 
@@ -174,8 +175,6 @@ public class InternalFinallyBlockInliner extends CoveringTryCatchNodeProcessor {
 
                 FinallyBlockInfo finallyInfo = findFinallyBlockBody(nodeWithDefaultHandlerIfExists, getTryBlocksMetaInfo().getAllIntervals());
                 if (finallyInfo == null) continue;
-                TryCatchBlockNodeInfo defaultHandlerBlock = clusterToFindFinally.getDefaultHandler();
-                assert defaultHandlerBlock != null;
 
                 originalDeepIndex++;
 
@@ -383,7 +382,7 @@ public class InternalFinallyBlockInliner extends CoveringTryCatchNodeProcessor {
         // so we should split original interval by inserted finally one
         for (TryCatchBlockNodeInfo block : updatingClusterBlocks) {
             //update exception mapping
-            SplittedPair<TryCatchBlockNodeInfo> split = tryBlocksMetaInfo.splitAndRemoveInterval(block, splitBy, false);
+            SplitPair<TryCatchBlockNodeInfo> split = tryBlocksMetaInfo.splitAndRemoveInterval(block, splitBy, false);
             checkFinally(split.getNewPart());
             checkFinally(split.getPatchedPart());
             //block patched in split method

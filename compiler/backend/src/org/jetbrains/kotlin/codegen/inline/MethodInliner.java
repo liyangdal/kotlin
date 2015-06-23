@@ -756,12 +756,16 @@ public class MethodInliner {
 
         final Type returnType;
 
-        final LabelNode labelNode;
+        final LabelNode finallyIntervalEnd;
 
-        public PointForExternalFinallyBlocks(@NotNull AbstractInsnNode beforeIns, @NotNull Type returnType, @NotNull LabelNode labelNode) {
+        public PointForExternalFinallyBlocks(
+                @NotNull AbstractInsnNode beforeIns,
+                @NotNull Type returnType,
+                @NotNull LabelNode finallyIntervalEnd
+        ) {
             this.beforeIns = beforeIns;
             this.returnType = returnType;
-            this.labelNode = labelNode;
+            this.finallyIntervalEnd = finallyIntervalEnd;
         }
 
     }
