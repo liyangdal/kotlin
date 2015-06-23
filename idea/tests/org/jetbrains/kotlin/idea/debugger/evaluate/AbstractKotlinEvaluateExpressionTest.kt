@@ -277,7 +277,7 @@ public abstract class AbstractKotlinEvaluateExpressionTest : KotlinDebuggerTestB
 
     private fun createContextElement(context: SuspendContextImpl): PsiElement {
         val contextElement = ContextUtil.getContextElement(debuggerContext)
-        Assert.assertTrue("KotlinCodeFragmentFactory should be accepted for context element otherwise default evaluator will be called. ContextElement = ${contextElement.getText()}",
+        Assert.assertTrue("KotlinCodeFragmentFactory should be accepted for context element otherwise default evaluator will be called. ContextElement = ${contextElement?.getText() ?: "null"}",
                           KotlinCodeFragmentFactory().isContextAccepted(contextElement))
 
         if (contextElement != null) {
