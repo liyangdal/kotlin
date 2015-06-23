@@ -35,15 +35,14 @@ public abstract class AndroidResourceManager(val project: Project) {
     public open fun propertyToXmlAttributes(property: JetProperty): List<PsiElement> = listOf()
 
     public fun getLayoutXmlFiles(): Map<String, List<PsiFile>> {
-        val info = androidModuleInfo
-        if (info == null) return mapOf()
+        val info = androidModuleInfo ?: return mapOf()
 
         val psiManager = PsiManager.getInstance(project)
         val fileManager = VirtualFileManager.getInstance()
 
         fun VirtualFile.getAllChildren(): List<VirtualFile> {
             val allChildren = arrayListOf<VirtualFile>()
-            val currentChildren = getChildren() ?: array()
+            val currentChildren = getChildren() ?: arrayOf()
             for (child in currentChildren) {
                 if (child.isDirectory()) {
                     allChildren.addAll(child.getAllChildren())
@@ -68,8 +67,8 @@ public abstract class AndroidResourceManager(val project: Project) {
 
     companion object {
         public fun getInstance(module: Module): AndroidResourceManager {
-            val service = ModuleServiceManager.getService<AndroidResourceManager>(module, javaClass<AndroidResourceManager>())
-            return service ?: module.getComponent<AndroidResourceManager>(javaClass<AndroidResourceManager>())
+            val service = ModuleServiceManager.getService(module, javaClass<AndroidResourceManager>())
+            return service ?: module.getComponent(javaClass<AndroidResourceManager>())
         }
     }
 

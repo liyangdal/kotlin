@@ -37,6 +37,7 @@ public abstract class AbstractAndroidCompletionTest : KotlinAndroidTestCase() {
         when (completionType()) {
             CompletionType.SMART -> settings.AUTOCOMPLETE_ON_SMART_TYPE_COMPLETION = false
             CompletionType.BASIC -> settings.AUTOCOMPLETE_ON_CODE_COMPLETION = false
+            else -> {}
         }
     }
 
