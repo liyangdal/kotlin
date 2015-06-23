@@ -53,15 +53,7 @@ public class PackagePartClassUtils {
     public static FqName getPackagePartFqName(@NotNull FqName facadeFqName, @NotNull VirtualFile file) {
         String fileName = FileUtil.getNameWithoutExtension(PathUtil.getFileName(file.getName()));
 
-        // path hashCode to prevent same name / different path collision
-        String srcName = String.format(
-                "%s$%s$%08x",
-                facadeFqName.shortName().asString(),
-                replaceSpecialSymbols(fileName),
-                getPathHashCode(file)
-        );
-
-        return facadeFqName.parent().child(Name.identifier(srcName));
+        return facadeFqName.parent().child(Name.identifier(replaceSpecialSymbols(fileName)));
     }
 
     @NotNull
