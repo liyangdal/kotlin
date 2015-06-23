@@ -623,6 +623,18 @@ public class CompileKotlinAgainstInlineKotlinTestGenerated extends AbstractCompi
                     JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxInline/nonLocalReturns/tryFinally/chained"), Pattern.compile("^(.+)\\.1.kt$"), true);
                 }
 
+                @TestMetadata("finallyInFinally.1.kt")
+                public void testFinallyInFinally() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxInline/nonLocalReturns/tryFinally/chained/finallyInFinally.1.kt");
+                    doBoxTestWithInlineCheck(fileName);
+                }
+
+                @TestMetadata("finallyInFinally2.1.kt")
+                public void testFinallyInFinally2() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxInline/nonLocalReturns/tryFinally/chained/finallyInFinally2.1.kt");
+                    doBoxTestWithInlineCheck(fileName);
+                }
+
                 @TestMetadata("intReturn.1.kt")
                 public void testIntReturn() throws Exception {
                     String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxInline/nonLocalReturns/tryFinally/chained/intReturn.1.kt");

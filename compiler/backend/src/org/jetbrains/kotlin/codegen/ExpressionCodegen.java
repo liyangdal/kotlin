@@ -4010,8 +4010,9 @@ The "returned" value of try expression with no finally is either the last expres
         return new Stack<BlockStackElement>(blockStackElements);
     }
 
-    public void addBlockStackElementsForNonLocalReturns(@NotNull Stack<BlockStackElement> elements) {
+    public void addBlockStackElementsForNonLocalReturns(@NotNull Stack<BlockStackElement> elements, int finallyDeepIndex) {
         blockStackElements.addAll(elements);
+        this.finallyDeep = finallyDeepIndex;
     }
 
     private static class NonLocalReturnInfo {

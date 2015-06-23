@@ -417,6 +417,7 @@ public class MethodInliner {
                 }
                 else if (cur.getType() == AbstractInsnNode.METHOD_INSN) {
                     if (InlineCodegenUtil.isFinallyStart(cur)) {
+                        //TODO deep index calc could be more precise
                         currentFinallyDeep = InlineCodegenUtil.getConstant(cur.getPrevious());
                     }
 
