@@ -290,9 +290,9 @@ public abstract class AbstractKotlinEvaluateExpressionTest : KotlinDebuggerTestB
                 assert(labelParts.size() == 2) { "Wrong format for DEBUG_LABEL directive: // DEBUG_LABEL: {localVariableName} = {labelText}"}
                 val localVariableName = labelParts[0].trim()
                 val labelName = labelParts[1].trim()
-                val localVariable = context.getFrameProxy().visibleVariableByName(localVariableName)
+                val localVariable = context.getFrameProxy()!!.visibleVariableByName(localVariableName)
                 assert(localVariable != null) { "Couldn't find localVariable for label: name = $localVariableName" }
-                val localVariableValue = context.getFrameProxy().getValue(localVariable) as? ObjectReference
+                val localVariableValue = context.getFrameProxy()!!.getValue(localVariable) as? ObjectReference
                 assert(localVariableValue != null) { "Local variable $localVariableName should be an ObjectReference" }
                 markupMap.put(localVariableValue, ValueMarkup(labelName, null, labelName))
             }
