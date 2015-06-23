@@ -33,6 +33,10 @@ public class JetVisitorVoid extends JetVisitor<Void, Void> {
         super.visitClass(klass, null);
     }
 
+    public void visitClassOrObject(@NotNull JetClassOrObject classOrObject) {
+        super.visitClassOrObject(classOrObject, null);
+    }
+
     public void visitSecondaryConstructor(@NotNull JetSecondaryConstructor constructor) {
         super.visitSecondaryConstructor(constructor, null);
     }
