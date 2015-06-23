@@ -145,15 +145,9 @@ class IntervalMetaInfo<T : SplittableInterval<T>> {
     }
 
     fun splitAndRemoveInterval(interval: T, by : Interval, keepStart: Boolean): SplitPair<T> {
-        val splitPair = interval.split(by, keepStart)
-        if (!keepStart) {
-            remapStartLabel(splitPair.newPart.startLabel, splitPair.patchedPart)
-        } else {
-            remapEndLabel(splitPair.newPart.endLabel, splitPair.patchedPart)
-        }
+        val splitPair = split(interval, by, keepStart)
         val removed = currentIntervals.remove(splitPair.patchedPart)
         assert(removed, {"Wrong interval structure: $splitPair"})
-        addNewInterval(splitPair.newPart)
         return splitPair
     }
 
