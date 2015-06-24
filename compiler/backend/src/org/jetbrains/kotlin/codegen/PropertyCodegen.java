@@ -21,11 +21,14 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.kotlin.builtins.KotlinBuiltIns;
 import org.jetbrains.kotlin.codegen.context.*;
 import org.jetbrains.kotlin.codegen.state.GenerationState;
 import org.jetbrains.kotlin.codegen.state.JetTypeMapper;
 import org.jetbrains.kotlin.descriptors.*;
+import org.jetbrains.kotlin.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.kotlin.load.java.JvmAbi;
+import org.jetbrains.kotlin.name.FqName;
 import org.jetbrains.kotlin.name.Name;
 import org.jetbrains.kotlin.psi.*;
 import org.jetbrains.kotlin.psi.psiUtil.PsiUtilPackage;
@@ -256,6 +259,10 @@ public class PropertyCodegen {
 
         ClassBuilder builder = v;
 
+        //TODO Move kotlin.jvm.publicField identifier to somewhere
+        boolean hasPublicFieldAnnotation = propertyDescriptor
+                .getAnnotations().findAnnotation(new FqName("kotlin.jvm.publicField")) != null;
+
         FieldOwnerContext backingFieldContext = context;
         if (AsmUtil.isInstancePropertyWithStaticBackingField(propertyDescriptor) ) {
             modifiers |= ACC_STATIC | getVisibilityForSpecialPropertyBackingField(propertyDescriptor, isDelegate);
@@ -265,6 +272,9 @@ public class PropertyCodegen {
                 backingFieldContext = codegen.context;
                 v.getSerializationBindings().put(STATIC_FIELD_IN_OUTER_CLASS, propertyDescriptor);
             }
+        }
+        else if (hasPublicFieldAnnotation && !isDelegate) {
+            modifiers |= ACC_PUBLIC;
         }
         else if (kind != OwnerKind.PACKAGE || isDelegate) {
             modifiers |= ACC_PRIVATE;

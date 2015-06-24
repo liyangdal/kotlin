@@ -149,6 +149,7 @@ public class ModifiersChecker {
             checkVarargsModifiers(modifierListOwner, descriptor);
         }
         checkPlatformNameApplicability(descriptor);
+        checkPublicFieldApplicability(modifierListOwner, descriptor);
         runDeclarationCheckers(modifierListOwner, descriptor);
     }
 
@@ -162,6 +163,7 @@ public class ModifiersChecker {
         reportIllegalModalityModifiers(modifierListOwner);
         reportIllegalVisibilityModifiers(modifierListOwner);
         checkPlatformNameApplicability(descriptor);
+        checkPublicFieldApplicability(modifierListOwner, descriptor);
         runDeclarationCheckers(modifierListOwner, descriptor);
     }
 
@@ -318,6 +320,25 @@ public class ModifiersChecker {
             }
         }
 
+    }
+
+    private void checkPublicFieldApplicability(@NotNull JetDeclaration modifierListOwner, @NotNull DeclarationDescriptor descriptor) {
+        //TODO do something with hardcoded "kotlin.jvm.publicField"
+        AnnotationDescriptor annotation = descriptor.getAnnotations().findAnnotation(new FqName("kotlin.jvm.publicField"));
+        if (annotation == null) return;
+
+        JetAnnotationEntry annotationEntry = trace.get(BindingContext.ANNOTATION_DESCRIPTOR_TO_PSI_ELEMENT, annotation);
+        if (annotationEntry == null) return;
+
+        if (!(descriptor instanceof PropertyDescriptor) || !(modifierListOwner instanceof JetProperty)) {
+            trace.report(INAPPLICABLE_PUBLIC_FIELD.on(annotationEntry));
+            return;
+        }
+
+        JetProperty jetProperty = (JetProperty) modifierListOwner;
+        if (jetProperty.hasDelegate()) {
+            trace.report(INAPPLICABLE_PUBLIC_FIELD.on(annotationEntry));
+        }
     }
 
     private static boolean isRenamableDeclaration(@NotNull DeclarationDescriptor descriptor) {
