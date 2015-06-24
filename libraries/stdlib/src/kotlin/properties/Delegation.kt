@@ -1,5 +1,7 @@
 package kotlin.properties
 
+import java.util.NoSuchElementException
+
 
 /**
  * Standard property delegates.
@@ -58,11 +60,31 @@ public object Delegates {
      * Returns a property delegate for a read/write property that stores its value in a map, using the property name
      * as a key.
      * @param map the map where the property values are stored.
+     */
+    deprecated("Delegate property to the map itself without creating a wrapper.", ReplaceWith("map"))
+    public fun mapVar<T>(map: MutableMap<in String, Any?>): ReadWriteProperty<Any?, T> {
+        return FixedMapVar<Any?, String, T>(map, propertyNameSelector, throwKeyNotFound)
+    }
+
+    /**
+     * Returns a property delegate for a read/write property that stores its value in a map, using the property name
+     * as a key.
+     * @param map the map where the property values are stored.
      * @param default the function returning the value of the property for a given object if it's missing from the given map.
      */
     public fun mapVar<T>(map: MutableMap<in String, Any?>,
-                         default: (thisRef: Any?, desc: String) -> T = defaultValueProvider): ReadWriteProperty<Any?, T> {
-        return FixedMapVar<Any?, String, T>(map, defaultKeyProvider, default)
+                         default: (thisRef: Any?, desc: String) -> T): ReadWriteProperty<Any?, T> {
+        return FixedMapVar<Any?, String, T>(map, propertyNameSelector, default)
+    }
+
+    /**
+     * Returns a property delegate for a read-only property that takes its value from a map, using the property name
+     * as a key.
+     * @param map the map where the property values are stored.
+     */
+    deprecated("Delegate property to the map itself without creating a wrapper.", ReplaceWith("map"))
+    public fun mapVal<T>(map: Map<in String, Any?>): ReadOnlyProperty<Any?, T> {
+        return FixedMapVal<Any?, String, T>(map, propertyNameSelector, throwKeyNotFound)
     }
 
     /**
@@ -72,8 +94,8 @@ public object Delegates {
      * @param default the function returning the value of the property for a given object if it's missing from the given map.
      */
     public fun mapVal<T>(map: Map<in String, Any?>,
-                         default: (thisRef: Any?, desc: String) -> T = defaultValueProvider): ReadOnlyProperty<Any?, T> {
-        return FixedMapVal<Any?, String, T>(map, defaultKeyProvider, default)
+                         default: (thisRef: Any?, desc: String) -> T): ReadOnlyProperty<Any?, T> {
+        return FixedMapVal<Any?, String, T>(map, propertyNameSelector, default)
     }
 }
 
@@ -161,7 +183,11 @@ private class BlockingLazyVal<T>(lock: Any?, private val initializer: () -> T) :
  * Exception thrown by the default implementation of property delegates which store values in a map
  * when the map does not contain the corresponding key.
  */
-public class KeyMissingException(message: String): RuntimeException(message)
+deprecated("Do not throw or catch this exception, use NoSuchElementException instead.")
+public class KeyMissingException
+    deprecated("Throw NoSuchElementException instead.", ReplaceWith("NoSuchElementException(message)"))
+    constructor(message: String): NoSuchElementException(message)
+
 
 /**
  * Implements the core logic for a property delegate that stores property values in a map.
@@ -194,11 +220,7 @@ public abstract class MapVal<T, K, out V>() : ReadOnlyProperty<T, V> {
     public override fun get(thisRef: T, property: PropertyMetadata) : V {
         val map = map(thisRef)
         val key = key(property)
-        if (!map.containsKey(key)) {
-            return default(thisRef, property)
-        }
-
-        return map[key] as V
+        return map.getOrElse(key, { default(thisRef, property) }) as V
     }
 }
 
@@ -217,8 +239,8 @@ public abstract class MapVar<T, K, V>() : MapVal<T, K, V>(), ReadWriteProperty<T
     }
 }
 
-private val defaultKeyProvider:(PropertyMetadata) -> String = {it.name}
-private val defaultValueProvider:(Any?, Any?) -> Nothing = {thisRef, key -> throw KeyMissingException("The value for key $key is missing from $thisRef.")}
+private val propertyNameSelector: (PropertyMetadata) -> String = {it.name}
+private val throwKeyNotFound: (Any?, Any?) -> Nothing = {thisRef, key -> throw KeyMissingException("The value for key $key is missing from $thisRef.")}
 
 /**
  * Implements a read-only property delegate that stores the property values in a given map instance and uses the given
@@ -229,7 +251,7 @@ private val defaultValueProvider:(Any?, Any?) -> Nothing = {thisRef, key -> thro
  */
 public open class FixedMapVal<T, K, out V>(private val map: Map<in K, Any?>,
                                               private val key: (PropertyMetadata) -> K,
-                                              private val default: (ref: T, key: K) -> V = defaultValueProvider) : MapVal<T, K, V>() {
+                                              private val default: (ref: T, key: K) -> V = throwKeyNotFound) : MapVal<T, K, V>() {
     protected override fun map(ref: T): Map<in K, Any?> {
         return map
     }
@@ -252,7 +274,7 @@ public open class FixedMapVal<T, K, out V>(private val map: Map<in K, Any?>,
  */
 public open class FixedMapVar<T, K, V>(private val map: MutableMap<in K, Any?>,
                                           private val key: (PropertyMetadata) -> K,
-                                          private val default: (ref: T, key: K) -> V = defaultValueProvider) : MapVar<T, K, V>() {
+                                          private val default: (ref: T, key: K) -> V = throwKeyNotFound) : MapVar<T, K, V>() {
     protected override fun map(ref: T): MutableMap<in K, Any?> {
         return map
     }
