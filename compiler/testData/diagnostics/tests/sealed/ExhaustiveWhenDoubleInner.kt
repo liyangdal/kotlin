@@ -1,10 +1,10 @@
-sealed class Sealed(val x: Int) {
-    object First: Sealed(12)
-    open class NonFirst(x: Int, val y: Int): Sealed(x) {
-        object Second: NonFirst(34, 2)
-        object Third: NonFirst(56, 3)
-        // It's ALLOWED to instantiate Sealed also here
-        object Fourth: Sealed(78)
+sealed class Sealed() {
+    object First: Sealed()
+    open class NonFirst: Sealed() {
+        object Second: NonFirst()
+        object Third: NonFirst()
+        // It's ALLOWED to inherit Sealed also from here
+        object Fourth: Sealed()
     }    
 }
 

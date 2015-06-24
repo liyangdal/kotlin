@@ -3,7 +3,7 @@ sealed class Sealed(val x: Int) {
     open class NonFirst(x: Int, val y: Int): Sealed(x) {
         object Second: NonFirst(34, 2)
         object Third: NonFirst(56, 3)
-        // It's ALLOWED to instantiate Sealed also here
+        // It's ALLOWED to inherit Sealed also here
         object Fourth: Sealed(78)
     }
 }

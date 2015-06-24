@@ -5,6 +5,8 @@ internal sealed class Tree {
     public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
     public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
     internal final fun max(): kotlin.Int
+    internal final fun maxIsClass(): kotlin.Int
+    internal final fun maxWithElse(): kotlin.Int
     public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
 
     internal object Empty : Tree {
@@ -12,6 +14,8 @@ internal sealed class Tree {
         public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
         public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
         internal final override /*1*/ /*fake_override*/ fun max(): kotlin.Int
+        internal final override /*1*/ /*fake_override*/ fun maxIsClass(): kotlin.Int
+        internal final override /*1*/ /*fake_override*/ fun maxWithElse(): kotlin.Int
         public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
     }
 
@@ -21,6 +25,8 @@ internal sealed class Tree {
         public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
         public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
         internal final override /*1*/ /*fake_override*/ fun max(): kotlin.Int
+        internal final override /*1*/ /*fake_override*/ fun maxIsClass(): kotlin.Int
+        internal final override /*1*/ /*fake_override*/ fun maxWithElse(): kotlin.Int
         public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
     }
 
@@ -31,6 +37,8 @@ internal sealed class Tree {
         public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
         public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
         internal final override /*1*/ /*fake_override*/ fun max(): kotlin.Int
+        internal final override /*1*/ /*fake_override*/ fun maxIsClass(): kotlin.Int
+        internal final override /*1*/ /*fake_override*/ fun maxWithElse(): kotlin.Int
         public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
     }
 }

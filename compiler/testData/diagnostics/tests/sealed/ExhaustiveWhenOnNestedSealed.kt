@@ -1,9 +1,9 @@
-sealed class Sealed(val x: Int) {
-    object First: Sealed(12)
-    sealed class NonFirst(val x: Int, val y: Int) {
-        object Second: NonFirst(34, 2)
-        object Third: NonFirst(56, 3)
-        object Fourth: Sealed(78)
+sealed class Sealed {
+    object First: Sealed()
+    sealed class NonFirst {
+        object Second: NonFirst()
+        object Third: NonFirst()
+        object Fourth: Sealed()
     }    
 }
 
