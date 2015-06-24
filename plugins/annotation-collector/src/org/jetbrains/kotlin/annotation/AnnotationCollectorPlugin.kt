@@ -66,11 +66,11 @@ public class AnnotationCollectorCommandLineProcessor : CommandLineProcessor {
                 CliOption("output", "<path>", "File in which annotated declarations will be placed", required = false)
 
         public val STUBS_PATH_OPTION: CliOption =
-                CliOption("stubs", "<path>", "Output path for stubs.", required = false)
+                CliOption("stubs", "<path>", "Output path for stubs", required = false)
 
         public val INHERITED_ANNOTATIONS_OPTION: CliOption =
                 CliOption("inherited", "<true/false>",
-                          "True if collecting Kotlin class names for inherited annotations is needed.", required = false)
+                          "True if collecting Kotlin class names for inherited annotations is needed", required = false)
     }
 
     override val pluginId: String = ANNOTATION_COLLECTOR_COMPILER_PLUGIN_ID
