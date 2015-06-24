@@ -16,7 +16,6 @@
 
 package org.jetbrains.kotlin.util
 
-import com.sun.org.apache.xml.internal.utils.BoolStack
 import java.lang.management.ManagementFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -45,8 +44,8 @@ public abstract class PerformanceCounter protected constructor(val name: String)
             enabled = enable
         }
 
-        public jvmOverloads fun create(name: String, reentable: Boolean = false): PerformanceCounter {
-            return if (reentable)
+        public jvmOverloads fun create(name: String, reenterable: Boolean = false): PerformanceCounter {
+            return if (reenterable)
                 ReenterableCounter(name)
             else
                 SimpleCounter(name)
@@ -64,9 +63,9 @@ public abstract class PerformanceCounter protected constructor(val name: String)
         }
     }
 
-    protected val excludedFrom: MutableSet<CounterWithExclude> = HashSet()
+    protected val excludedFrom: MutableList<CounterWithExclude> = ArrayList()
 
-    private  var count: Int = 0
+    private var count: Int = 0
     protected var totalTimeNanos: Long = 0
 
     init {
@@ -143,6 +142,12 @@ private class ReenterableCounter(name: String): PerformanceCounter(name) {
     }
 }
 
+/**
+ *  This class allowed calculate pure time for some method exclude some other methods.
+ *  For example, we can calculate total time for CallResolver exclude time for getTypeInfo()
+ *
+ *  Main and excluded methods may be reenterabled.
+ */
 private class CounterWithExclude(name: String, vararg excludedCounters: PerformanceCounter): PerformanceCounter(name) {
     companion object {
         private val counterToCallStackMapThreadLocal = ThreadLocal<MutableMap<CounterWithExclude, CallStackWithTime>>()
@@ -155,34 +160,38 @@ private class CounterWithExclude(name: String, vararg excludedCounters: Performa
         excludedCounters.forEach { it.excludedFrom.add(this) }
     }
 
+    private val callStack: CallStackWithTime
+        get() = getCallStack(this)
+
     override fun <T> countTime(block: () -> T): T {
-        totalTimeNanos += getCallStack(this).push(true)
+        totalTimeNanos += callStack.push(true)
         try {
             return block()
         }
         finally {
-            totalTimeNanos += getCallStack(this).pop(true)
+            totalTimeNanos += callStack.pop(true)
         }
     }
 
     fun enterExcludedMethod() {
-        totalTimeNanos += getCallStack(this).push(false)
+        totalTimeNanos += callStack.push(false)
     }
 
     fun exitExcludedMethod() {
-        totalTimeNanos += getCallStack(this).pop(false)
+        totalTimeNanos += callStack.pop(false)
     }
 
-    class CallStackWithTime {
-        private val callStack = BoolStack()
+    private class CallStackWithTime {
+        private val callStack = Stack<Boolean>()
         private var intervalStartTime: Long = 0
 
-        private fun intervalUsefulTime(callStackUpdate: BoolStack.() -> Unit): Long {
-            val now = PerformanceCounter.currentThreadCpuTime()
-            val delta = if (callStack.peekOrFalse()) now - intervalStartTime else 0
-            intervalStartTime = now
+        fun Stack<Boolean>.peekOrFalse() = if (isEmpty()) false else peek()
 
+        private fun intervalUsefulTime(callStackUpdate: Stack<Boolean>.() -> Unit): Long {
+            val delta = if (callStack.peekOrFalse()) PerformanceCounter.currentThreadCpuTime() - intervalStartTime else 0
             callStack.callStackUpdate()
+
+            intervalStartTime = PerformanceCounter.currentThreadCpuTime()
             return delta
         }
 

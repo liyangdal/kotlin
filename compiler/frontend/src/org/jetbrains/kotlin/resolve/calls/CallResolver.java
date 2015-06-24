@@ -75,9 +75,10 @@ public class CallResolver {
     private TaskPrioritizer taskPrioritizer;
     private AdditionalCheckerProvider additionalCheckerProvider;
     
-    private static PerformanceCounter callResolvePerfCounter
+    private final static PerformanceCounter callResolvePerfCounter
             = PerformanceCounter.Companion.create("Call resolve", ExpressionTypingVisitorDispatcher.typeInfoPerfCounter);
-    private static PerformanceCounter candidatePerfCounter = PerformanceCounter.Companion.create("Call resolve candidate analysis", true);
+    private final static PerformanceCounter candidatePerfCounter
+            = PerformanceCounter.Companion.create("Call resolve candidate analysis", true);
 
     @Inject
     public void setExpressionTypingServices(@NotNull ExpressionTypingServices expressionTypingServices) {

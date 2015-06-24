@@ -40,7 +40,7 @@ import static org.jetbrains.kotlin.resolve.bindingContextUtil.BindingContextUtil
 
 public class ExpressionTypingVisitorDispatcher extends JetVisitor<JetTypeInfo, ExpressionTypingContext> implements ExpressionTypingInternals {
 
-    public static PerformanceCounter typeInfoPerfCounter = PerformanceCounter.Companion.create("Type info", true);
+    public static final PerformanceCounter typeInfoPerfCounter = PerformanceCounter.Companion.create("Type info", true);
 
     public interface StatementVisitorProvider {
         ExpressionTypingVisitorForStatements get(@NotNull ExpressionTypingContext context);
