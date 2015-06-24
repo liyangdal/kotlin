@@ -95,7 +95,7 @@ public class DirectiveBasedActionUtils {
             @Override
             public boolean apply(String input) {
                 for (String prefix : IRRELEVANT_ACTION_PREFIXES) {
-                    if (input.startsWith(prefix) || input.isEmpty()) {
+                    if (input.startsWith(prefix)) {
                         return false;
                     }
                 }
@@ -105,5 +105,5 @@ public class DirectiveBasedActionUtils {
     }
 
     private static final Collection<String> IRRELEVANT_ACTION_PREFIXES =
-            Arrays.asList("Disable ", "Edit intention settings", "Edit inspection profile setting", "Inject language or reference", "Suppress ");
+            Arrays.asList("Disable ", "Edit intention settings", "Edit inspection profile setting", "Inject language or reference");
 }

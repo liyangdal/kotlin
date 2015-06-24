@@ -16,23 +16,28 @@
 
 package org.jetbrains.kotlin.idea.test
 
-import com.intellij.codeInsight.daemon.impl.EditorTracker
 import com.intellij.ide.startup.impl.StartupManagerImpl
-import com.intellij.openapi.actionSystem.ActionPlaces
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.Presentation
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.startup.StartupManager
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
+import com.intellij.psi.FileViewProvider
+import com.intellij.psi.PsiManager
+import com.intellij.psi.impl.PsiManagerEx
+import com.intellij.psi.impl.file.impl.FileManager
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
 import org.jetbrains.kotlin.idea.actions.internal.KotlinInternalMode
+import org.jetbrains.kotlin.idea.test.KotlinStdJSProjectDescriptor
+import org.jetbrains.kotlin.idea.references.BuiltInsReferenceResolver
+import org.jetbrains.kotlin.psi.JetFile
 import org.jetbrains.kotlin.test.InTextDirectivesUtils
 import org.jetbrains.kotlin.test.JetTestUtils
-import org.jetbrains.kotlin.utils.rethrow
+import org.jetbrains.kotlin.utils.*
+
 import java.io.File
 import java.io.IOException
 
@@ -46,16 +51,22 @@ public abstract class JetLightCodeInsightFixtureTestCase : LightCodeInsightFixtu
 
         kotlinInternalModeOriginalValue = KotlinInternalMode.enabled
         KotlinInternalMode.enabled = true
-
-        getProject().getComponent(javaClass<EditorTracker>())?.projectOpened()
     }
 
     override fun tearDown() {
         KotlinInternalMode.enabled = kotlinInternalModeOriginalValue
         VfsRootAccess.disallowRootAccess(JetTestUtils.getHomeDirectory())
 
-        unInvalidateBuiltins(getProject()) {
-            super.tearDown()
+        val builtInsSources = getProject().getComponent<BuiltInsReferenceResolver>(javaClass<BuiltInsReferenceResolver>()).getBuiltInsSources()
+        val fileManager = (PsiManager.getInstance(getProject()) as PsiManagerEx).getFileManager()
+
+        super.tearDown()
+
+        // Restore mapping between PsiFiles and VirtualFiles dropped in FileManager.cleanupForNextTest(),
+        // otherwise built-ins psi elements will become invalid in next test.
+        for (source in builtInsSources) {
+            val provider = source.getViewProvider()
+            fileManager.setViewProvider(provider.getVirtualFile(), provider)
         }
     }
 

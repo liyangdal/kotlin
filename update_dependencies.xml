@@ -1,5 +1,5 @@
 <project name="Update Dependencies" default="update">
-    <property name="ideaVersion" value="142.2491.1"/>
+    <property name="ideaVersion" value="141.1531.2"/>
 
     <property name="kotlin.bootstrap.locator" value="buildType:bt345,tag:bootstrap,status:SUCCESS"/>
     <property name="kotlin.bootstrap.locator.force" value="false"/>
@@ -218,7 +218,7 @@
         <!-- <get-asm-sources-and-rename-packages asm.version="5.0.1"/> -->
 
         <!-- Junit Sources -->
-        <get-maven-library prefix="junit" lib="junit" version="4.12" bin="false"/>
+        <get-maven-library prefix="junit" lib="junit" version="4.11" bin="false"/>
         <get-maven-library prefix="org/hamcrest" lib="hamcrest-core" version="1.3" bin="false"/>
 
         <!-- Protocol Buffers -->
