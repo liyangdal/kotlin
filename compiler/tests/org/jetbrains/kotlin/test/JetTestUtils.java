@@ -526,14 +526,6 @@ public class JetTestUtils {
             @NotNull List<File> javaFiles,
             @NotNull List<File> ktFiles,
             @NotNull File outDir,
-            @NotNull Disposable disposable
-    ) throws IOException {
-        compileKotlinWithJava(javaFiles, ktFiles, outDir, disposable, null);
-    }
-    public static void compileKotlinWithJava(
-            @NotNull List<File> javaFiles,
-            @NotNull List<File> ktFiles,
-            @NotNull File outDir,
             @NotNull Disposable disposable,
             @Nullable File javaErrorFile
     ) throws IOException {
