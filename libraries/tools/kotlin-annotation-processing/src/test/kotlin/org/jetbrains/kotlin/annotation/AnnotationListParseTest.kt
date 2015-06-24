@@ -61,14 +61,10 @@ public class AnnotationListParseTest {
             }
         }
 
-        val actualAnnotationsSorted = actualAnnotations.toString()
-                .lines().filter { it.isNotEmpty() }.sort().joinToString("\n")
-
+        val actualAnnotationsSorted = actualAnnotations.toString().lines().filter { it.isNotEmpty() }.sort()
         val classDeclarationsSorted = annotationProvider.kotlinClasses.sort()
 
-        val fileContents = (listOf(actualAnnotationsSorted) + classDeclarationsSorted)
-                .joinToString("\n").trim('\n', '\r', ' ', '\t')
-
+        val fileContents = (actualAnnotationsSorted + classDeclarationsSorted).joinToString("\n")
         assertEqualsToFile(expectedFile, fileContents)
     }
 
