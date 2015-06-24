@@ -36,6 +36,7 @@ messages/**)
 -libraryjars '<rtjar>'
 -libraryjars '<jssejar>'
 -libraryjars '<bootstrap.runtime>'
+-libraryjars '<bootstrap.reflect>'
 
 -target 1.6
 -dontoptimize
