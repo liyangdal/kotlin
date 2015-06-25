@@ -1378,6 +1378,12 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             doTest(fileName);
         }
 
+        @TestMetadata("kt5347.kt")
+        public void testKt5347() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/classes/kt5347.kt");
+            doTest(fileName);
+        }
+
         @TestMetadata("kt6136.kt")
         public void testKt6136() throws Exception {
             String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/classes/kt6136.kt");
@@ -2195,6 +2201,69 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
         public void testTryCatchFinallyChain() throws Exception {
             String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/tryCatchFinallyChain.kt");
             doTest(fileName);
+        }
+
+        @TestMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class BreakContinueInExpressions extends AbstractBlackBoxCodegenTest {
+            public void testAllFilesPresentInBreakContinueInExpressions() throws Exception {
+                JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions"), Pattern.compile("^(.+)\\.kt$"), true);
+            }
+
+            @TestMetadata("breakFromOuter.kt")
+            public void testBreakFromOuter() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/breakFromOuter.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("breakInExpr.kt")
+            public void testBreakInExpr() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/breakInExpr.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("continueInExpr.kt")
+            public void testContinueInExpr() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/continueInExpr.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("inlineWithStack.kt")
+            public void testInlineWithStack() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/inlineWithStack.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("innerLoopWithStack.kt")
+            public void testInnerLoopWithStack() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/innerLoopWithStack.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("popSizes.kt")
+            public void testPopSizes() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/popSizes.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("tryFinally1.kt")
+            public void testTryFinally1() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/tryFinally1.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("tryFinally2.kt")
+            public void testTryFinally2() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/tryFinally2.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("whileTrueBreak.kt")
+            public void testWhileTrueBreak() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/box/controlStructures/breakContinueInExpressions/whileTrueBreak.kt");
+                doTest(fileName);
+            }
         }
     }
 
