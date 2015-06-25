@@ -12,7 +12,7 @@ fun box(): String {
 //*S Kotlin
 //*F
 //+ 1 inlineComponent.1.kt
-//_DefaultPackage
+//inlineComponent_1
 //+ 2 inlineComponent.2.kt
 //zzz/ZzzPackage
 //*L

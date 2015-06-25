@@ -15,7 +15,7 @@ fun box(): String {
 //*S Kotlin
 //*F
 //+ 1 assertion.1.kt
-//_DefaultPackage
+//assertion_1
 //+ 2 assertion.2.kt
 //test/TestPackage
 //*L

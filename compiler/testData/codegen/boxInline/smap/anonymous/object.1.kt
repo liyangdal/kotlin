@@ -22,7 +22,7 @@ fun box(): String {
 //*S Kotlin
 //*F
 //+ 1 object.1.kt
-//_DefaultPackage
+//object_1
 //+ 2 object.2.kt
 //builders/BuildersPackage
 //*L
@@ -36,9 +36,9 @@ fun box(): String {
 //*S Kotlin
 //*F
 //+ 1 object.2.kt
-//builders/BuildersPackage$object_2$HASH$call$1
+//builders/object_2$call$1
 //+ 2 object.1.kt
-//_DefaultPackage$object_1$HASH
+//object_1
 //*L
 //1#1,21:1
 //8#2:22
