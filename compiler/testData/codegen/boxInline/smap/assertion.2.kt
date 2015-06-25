@@ -20,7 +20,7 @@ public inline fun massert(value: Boolean, message: Any = "Assertion failed") {
     }
 }
 
-//TODO SHOUDL BE ABSENT
+//TODO SHOULD BE ABSENT
 
 //SMAP
 //assertion.2.kt
