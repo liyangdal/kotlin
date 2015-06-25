@@ -394,7 +394,7 @@ class CollectionTest {
         val indices = data.indices
         assertEquals(0, indices.start)
         assertEquals(1, indices.end)
-        assertEquals(indices, data.size().indices)
+        assertEquals(indices, 0..data.size() - 1)
     }
 
     test fun contains() {
