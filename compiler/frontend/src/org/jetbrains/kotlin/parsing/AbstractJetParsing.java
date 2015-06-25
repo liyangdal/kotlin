@@ -484,6 +484,6 @@ import static org.jetbrains.kotlin.lexer.JetTokens.*;
     @SuppressWarnings("UnusedDeclaration")
     @TestOnly
     public String currentContext() {
-        return StringsPackage_.substringWithContext(myBuilder.getOriginalText(), myBuilder.getCurrentOffset(), myBuilder.getCurrentOffset(), 20);
+        return StringsPackage.substringWithContext(myBuilder.getOriginalText(), myBuilder.getCurrentOffset(), myBuilder.getCurrentOffset(), 20);
     }
 }
