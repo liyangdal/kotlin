@@ -73,8 +73,8 @@ public class KotlinIndicesHelper(
     }
 
     public fun getTopLevelCallables(nameFilter: (String) -> Boolean): Collection<CallableDescriptor> {
-        return (JetTopLevelFunctionFqnNameIndex.getInstance().getAllKeys(project).sequence() +
-                    JetTopLevelPropertyFqnNameIndex.getInstance().getAllKeys(project).sequence())
+        return (JetTopLevelFunctionFqnNameIndex.getInstance().getAllKeys(project).asSequence() +
+                JetTopLevelPropertyFqnNameIndex.getInstance().getAllKeys(project).asSequence())
                 .map { FqName(it) }
                 .filter { nameFilter(it.shortName().asString()) }
                 .toSet()
@@ -92,12 +92,12 @@ public class KotlinIndicesHelper(
         val index = JetTopLevelExtensionsByReceiverTypeIndex.INSTANCE
 
         val declarations = index.getAllKeys(project)
-                .sequence()
+                .asSequence()
                 .filter {
                     JetTopLevelExtensionsByReceiverTypeIndex.receiverTypeNameFromKey(it) in receiverTypeNames
                     && nameFilter(JetTopLevelExtensionsByReceiverTypeIndex.callableNameFromKey(it))
                 }
-                .flatMap { index.get(it, project, scope).sequence() }
+                .flatMap { index.get(it, project, scope).asSequence() }
 
         return findSuitableExtensions(declarations, receiverValues, dataFlowInfo, bindingContext)
     }
@@ -173,7 +173,7 @@ public class KotlinIndicesHelper(
     }
 
     public fun getClassDescriptors(nameFilter: (String) -> Boolean, kindFilter: (ClassKind) -> Boolean): Collection<ClassDescriptor> {
-        return JetFullClassNameIndex.getInstance().getAllKeys(project).sequence()
+        return JetFullClassNameIndex.getInstance().getAllKeys(project).asSequence()
                 .map { FqName(it) }
                 .filter { nameFilter(it.shortName().asString()) }
                 .toList()
