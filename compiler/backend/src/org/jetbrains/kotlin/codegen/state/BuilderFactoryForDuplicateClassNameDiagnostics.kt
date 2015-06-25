@@ -46,13 +46,22 @@ class BuilderFactoryForDuplicateClassNameDiagnostics(
         if (origin.descriptor != another.descriptor) {
             if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE || another.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
                 if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
-                    diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(another.element, internalName))
+                    reportError(another, internalName)
                 } else {
-                    diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(another.element, internalName))
+                    reportError(another, internalName)
                 }
             } else {
-                diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(origin.element, internalName))
+                if (origin.element != null) {
+                    reportError(origin, internalName)
+                }
+                if (another.element != null) {
+                    reportError(another, internalName)
+                }
             }
         }
+    }
+
+    private fun reportError(another: JvmDeclarationOrigin, internalName: String) {
+        diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(another.element, internalName))
     }
 }
