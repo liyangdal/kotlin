@@ -226,7 +226,7 @@ public class InlineCodegen extends CallGenerator {
 
             SMAP smap;
             if (callDefault) {
-                Type ownerType = typeMapper.mapOwner(functionDescriptor, false/*use facade class*/);
+                Type ownerType = typeMapper.mapOwner(functionDescriptor, true);
                 FakeMemberCodegen parentCodegen = new FakeMemberCodegen(codegen.getParentCodegen(), inliningFunction,
                                                                         (FieldOwnerContext) methodContext.getParentContext(),
                                                                         ownerType.getInternalName());
