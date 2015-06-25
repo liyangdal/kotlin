@@ -237,7 +237,7 @@ public class KotlinBuilder : ModuleLevelBuilder(BuilderCategory.SOURCE_PROCESSOR
 
         val representativeTarget = chunk.representativeTarget()
 
-        fun concatenate(strings: Array<String>?, cp: List<String>) = array(*(strings ?: array<String>()), *cp.copyToArray())
+        fun concatenate(strings: Array<String>?, cp: List<String>) = arrayOf(*(strings ?: arrayOf<String>()), *cp.toTypedArray())
 
         for (argumentProvider in ServiceLoader.load(javaClass<KotlinJpsCompilerArgumentsProvider>())) {
             // appending to pluginOptions
