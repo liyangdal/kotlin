@@ -19,7 +19,6 @@ package org.jetbrains.kotlin.idea.completion
 import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.lookup.*
 import com.intellij.codeInsight.lookup.impl.LookupCellRenderer
-import com.intellij.openapi.util.Iconable
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.asJava.KotlinLightClass
@@ -30,6 +29,8 @@ import org.jetbrains.kotlin.idea.caches.resolve.ResolutionFacade
 import org.jetbrains.kotlin.idea.completion.handlers.*
 import org.jetbrains.kotlin.idea.util.TypeNullability
 import org.jetbrains.kotlin.idea.util.nullability
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.renderer.DescriptorRenderer
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.DescriptorUtils
@@ -42,13 +43,15 @@ public class LookupElementFactory(
 ) {
     public fun createLookupElement(
             descriptor: DeclarationDescriptor,
-            boldImmediateMembers: Boolean
+            boldImmediateMembers: Boolean,
+            qualifyNestedClasses: Boolean = false,
+            includeClassTypeArguments: Boolean = true
     ): LookupElement {
         val _descriptor = if (descriptor is CallableMemberDescriptor)
             DescriptorUtils.unwrapFakeOverride(descriptor)
         else
             descriptor
-        var element = createLookupElement(_descriptor, DescriptorToSourceUtils.descriptorToDeclaration(_descriptor))
+        var element = createLookupElement(_descriptor, DescriptorToSourceUtils.descriptorToDeclaration(_descriptor), qualifyNestedClasses, includeClassTypeArguments)
 
         val weight = callableWeight(descriptor)
         if (weight != null) {
@@ -97,34 +100,47 @@ public class LookupElementFactory(
         GRAYED
     }
 
-    public fun createLookupElementForJavaClass(psiClass: PsiClass): LookupElement {
-        var element = LookupElementBuilder.create(psiClass, psiClass.getName()).withInsertHandler(KotlinClassInsertHandler)
+    public fun createLookupElementForJavaClass(psiClass: PsiClass, qualifyNestedClasses: Boolean = false, includeClassTypeArguments: Boolean = true): LookupElement {
+        val lookupObject = object : DeclarationLookupObjectImpl(null, psiClass, resolutionFacade) {
+            override fun getIcon(flags: Int) = psiClass.getIcon(flags)
+        }
+        var element = LookupElementBuilder.create(lookupObject, psiClass.getName())
+                .withInsertHandler(KotlinClassInsertHandler)
 
         val typeParams = psiClass.getTypeParameters()
-        if (typeParams.isNotEmpty()) {
+        if (includeClassTypeArguments && typeParams.isNotEmpty()) {
             element = element.appendTailText(typeParams.map { it.getName() }.joinToString(", ", "<", ">"), true)
         }
 
         val qualifiedName = psiClass.getQualifiedName()!!
-        val packageName = qualifiedName.substringBeforeLast('.', "<root>")
-        element = element.appendTailText(" ($packageName)", true)
+        var containerName = qualifiedName.substringBeforeLast('.', FqName.ROOT.toString())
 
-        if (psiClass.isDeprecated()) {
+        if (qualifyNestedClasses) {
+            val nestLevel = psiClass.parents.takeWhile { it is PsiClass }.count()
+            if (nestLevel > 0) {
+                var itemText = psiClass.getName()
+                for (i in 1..nestLevel) {
+                    itemText = containerName.substringAfterLast('.') + "." + itemText
+                    containerName = containerName.substringBeforeLast('.', FqName.ROOT.toString())
+                }
+                element = element.withPresentableText(itemText)
+            }
+        }
+
+        element = element.appendTailText(" ($containerName)", true)
+
+        if (lookupObject.isDeprecated) {
             element = element.setStrikeout(true)
         }
 
-        // add icon in renderElement only to pass presentation.isReal()
-        return object : LookupElementDecorator<LookupElement>(element) {
-            override fun renderElement(presentation: LookupElementPresentation) {
-                super.renderElement(presentation)
-                presentation.setIcon(DefaultLookupItemRenderer.getRawIcon(element, presentation.isReal()))
-            }
-        }
+        return element.withIconFromLookupObject()
     }
 
     private fun createLookupElement(
             descriptor: DeclarationDescriptor,
-            declaration: PsiElement?
+            declaration: PsiElement?,
+            qualifyNestedClasses: Boolean,
+            includeClassTypeArguments: Boolean
     ): LookupElement {
         if (descriptor is ClassifierDescriptor &&
             declaration is PsiClass &&
@@ -132,7 +148,7 @@ public class LookupElementFactory(
             // for java classes we create special lookup elements
             // because they must be equal to ones created in TypesCompletion
             // otherwise we may have duplicates
-            return createLookupElementForJavaClass(declaration)
+            return createLookupElementForJavaClass(declaration, qualifyNestedClasses, includeClassTypeArguments)
         }
 
         // for constructor use name and icon of containing class
@@ -147,10 +163,11 @@ public class LookupElementFactory(
             iconDeclaration = declaration
         }
         val name = nameAndIconDescriptor.getName().asString()
-        val icon = JetDescriptorIconProvider.getIcon(nameAndIconDescriptor, iconDeclaration, Iconable.ICON_FLAG_VISIBILITY)
 
-        var element = LookupElementBuilder.create(DeclarationDescriptorLookupObjectImpl(descriptor, resolutionFacade, declaration), name)
-                .withIcon(icon)
+        val lookupObject = object : DeclarationLookupObjectImpl(descriptor, declaration, resolutionFacade) {
+            override fun getIcon(flags: Int) = JetDescriptorIconProvider.getIcon(nameAndIconDescriptor, iconDeclaration, flags)
+        }
+        var element = LookupElementBuilder.create(lookupObject, name)
 
         when (descriptor) {
             is FunctionDescriptor -> {
@@ -165,11 +182,23 @@ public class LookupElementFactory(
 
             is ClassDescriptor -> {
                 val typeParams = descriptor.getTypeConstructor().getParameters()
-                if (typeParams.isNotEmpty()) {
+                if (includeClassTypeArguments && typeParams.isNotEmpty()) {
                     element = element.appendTailText(typeParams.map { it.getName().asString() }.joinToString(", ", "<", ">"), true)
                 }
 
-                element = element.appendTailText(" (" + DescriptorUtils.getFqName(descriptor.getContainingDeclaration()) + ")", true)
+                var container = descriptor.getContainingDeclaration()
+
+                if (qualifyNestedClasses) {
+                    element = element.withPresentableText(DescriptorRenderer.SHORT_NAMES_IN_TYPES.renderClassifierName(descriptor))
+
+                    while (container is ClassDescriptor) {
+                        container = container.getContainingDeclaration()
+                    }
+                }
+
+                if (container is PackageFragmentDescriptor || container is ClassDescriptor) {
+                    element = element.appendTailText(" (" + DescriptorUtils.getFqName(container) + ")", true)
+                }
             }
 
             else -> {
@@ -199,7 +228,7 @@ public class LookupElementFactory(
             }
         }
 
-        if (KotlinBuiltIns.isDeprecated(descriptor)) {
+        if (lookupObject.isDeprecated) {
             element = element.withStrikeoutness(true)
         }
 
@@ -207,10 +236,20 @@ public class LookupElementFactory(
         element = element.withInsertHandler(insertHandler)
 
         if (insertHandler is KotlinFunctionInsertHandler && insertHandler.lambdaInfo != null) {
-            element.putUserData<Boolean>(KotlinCompletionCharFilter.ACCEPT_OPENING_BRACE, true)
+            element.putUserData(KotlinCompletionCharFilter.ACCEPT_OPENING_BRACE, Unit)
         }
 
-        return element
+        return element.withIconFromLookupObject()
+    }
+
+    private fun LookupElement.withIconFromLookupObject(): LookupElement {
+        // add icon in renderElement only to pass presentation.isReal()
+        return object : LookupElementDecorator<LookupElement>(this) {
+            override fun renderElement(presentation: LookupElementPresentation) {
+                super.renderElement(presentation)
+                presentation.setIcon(DefaultLookupItemRenderer.getRawIcon(this@withIconFromLookupObject, presentation.isReal()))
+            }
+        }
     }
 
     private fun callableWeight(descriptor: DeclarationDescriptor): CallableWeight? {

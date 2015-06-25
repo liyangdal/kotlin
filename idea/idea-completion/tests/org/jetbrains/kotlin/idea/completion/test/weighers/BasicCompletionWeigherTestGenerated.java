@@ -53,6 +53,12 @@ public class BasicCompletionWeigherTestGenerated extends AbstractBasicCompletion
         doTest(fileName);
     }
 
+    @TestMetadata("DeprecatedJavaClass.kt")
+    public void testDeprecatedJavaClass() throws Exception {
+        String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/DeprecatedJavaClass.kt");
+        doTest(fileName);
+    }
+
     @TestMetadata("ExactMatchForKeyword.kt")
     public void testExactMatchForKeyword() throws Exception {
         String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/ExactMatchForKeyword.kt");
@@ -129,5 +135,50 @@ public class BasicCompletionWeigherTestGenerated extends AbstractBasicCompletion
     public void testReturnBoolean() throws Exception {
         String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/ReturnBoolean.kt");
         doTest(fileName);
+    }
+
+    @TestMetadata("idea/idea-completion/testData/weighers/basic/parameterNameAndType")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class ParameterNameAndType extends AbstractBasicCompletionWeigherTest {
+        public void testAllFilesPresentInParameterNameAndType() throws Exception {
+            JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/idea-completion/testData/weighers/basic/parameterNameAndType"), Pattern.compile("^([^\\.]+)\\.kt$"), true);
+        }
+
+        @TestMetadata("Deprecated.kt")
+        public void testDeprecated() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/parameterNameAndType/Deprecated.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("FromCurrentFilePriority.kt")
+        public void testFromCurrentFilePriority() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/parameterNameAndType/FromCurrentFilePriority.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("ImportedFirst.kt")
+        public void testImportedFirst() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/parameterNameAndType/ImportedFirst.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("ShorterFirst.kt")
+        public void testShorterFirst() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/parameterNameAndType/ShorterFirst.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("StartMatchFirst.kt")
+        public void testStartMatchFirst() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/parameterNameAndType/StartMatchFirst.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("UserPrefix.kt")
+        public void testUserPrefix() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/weighers/basic/parameterNameAndType/UserPrefix.kt");
+            doTest(fileName);
+        }
     }
 }

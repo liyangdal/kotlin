@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.types.TypeUtils;
 import org.jetbrains.kotlin.types.checker.JetTypeChecker;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -198,7 +199,17 @@ public class JetNameSuggester {
 
     private static final String[] ACCESSOR_PREFIXES = { "get", "is", "set" };
 
+    public static List<String> getCamelNames(String name, JetNameValidator validator, boolean startLowerCase) {
+        ArrayList<String> result = new ArrayList<String>();
+        addCamelNames(result, name, validator, startLowerCase);
+        return result;
+    }
+
     private static void addCamelNames(ArrayList<String> result, String name, JetNameValidator validator) {
+        addCamelNames(result, name, validator, true);
+    }
+
+    private static void addCamelNames(ArrayList<String> result, String name, JetNameValidator validator, boolean startLowerCase) {
         if (name == "") return;
         String s = deleteNonLetterFromString(name);
 
@@ -212,14 +223,44 @@ public class JetNameSuggester {
             }
         }
 
+        boolean upperCaseLetterBefore = false;
         for (int i = 0; i < s.length(); ++i) {
+            char c = s.charAt(i);
+            boolean upperCaseLetter = Character.isUpperCase(c);
+
             if (i == 0) {
-                addName(result, StringUtil.decapitalize(s), validator);
+                addName(result, startLowerCase ? decapitalize(s) : s, validator);
             }
-            else if (s.charAt(i) >= 'A' && s.charAt(i) <= 'Z') {
-                addName(result, StringUtil.decapitalize(s.substring(i)), validator);
+            else {
+                if (upperCaseLetter && !upperCaseLetterBefore) {
+                    String substring = s.substring(i);
+                    addName(result, startLowerCase ? decapitalize(substring) : substring, validator);
+                }
             }
+
+            upperCaseLetterBefore = upperCaseLetter;
         }
+    }
+
+    private static String decapitalize(String s) {
+        char c = s.charAt(0);
+        if (!Character.isUpperCase(c)) return s;
+
+        StringBuilder builder = new StringBuilder(s.length());
+        boolean decapitalize = true;
+        for (int i = 0; i < s.length(); i++) {
+            c = s.charAt(i);
+            if (decapitalize) {
+                if (Character.isUpperCase(c)) {
+                    c = Character.toLowerCase(c);
+                }
+                else {
+                    decapitalize = false;
+                }
+            }
+            builder.append(c);
+        }
+        return builder.toString();
     }
     
     private static String deleteNonLetterFromString(String s) {

@@ -239,6 +239,69 @@ public class BasicCompletionHandlerTestGenerated extends AbstractBasicCompletion
         }
     }
 
+    @TestMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class ParameterNameAndType extends AbstractBasicCompletionHandlerTest {
+        public void testAllFilesPresentInParameterNameAndType() throws Exception {
+            JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/idea-completion/testData/handlers/basic/parameterNameAndType"), Pattern.compile("^(.+)\\.kt$"), true);
+        }
+
+        @TestMetadata("CodeStyleSettings.kt")
+        public void testCodeStyleSettings() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/CodeStyleSettings.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("Comma.kt")
+        public void testComma() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/Comma.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("InsertImport.kt")
+        public void testInsertImport() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/InsertImport.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("NoInsertionOnTypingColon.kt")
+        public void testNoInsertionOnTypingColon() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/NoInsertionOnTypingColon.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("NoInsertionOnTypingSpace.kt")
+        public void testNoInsertionOnTypingSpace() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/NoInsertionOnTypingSpace.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("ParameterInFile.kt")
+        public void testParameterInFile() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/ParameterInFile.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("ParameterInFile2.kt")
+        public void testParameterInFile2() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/ParameterInFile2.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("Simple.kt")
+        public void testSimple() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/Simple.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("UserPrefix.kt")
+        public void testUserPrefix() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/idea-completion/testData/handlers/basic/parameterNameAndType/UserPrefix.kt");
+            doTest(fileName);
+        }
+    }
+
     @TestMetadata("idea/idea-completion/testData/handlers/basic/stringTemplate")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)

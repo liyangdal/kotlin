@@ -23,11 +23,13 @@ import com.intellij.psi.PsiDocumentManager
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
 import org.jetbrains.kotlin.idea.completion.isAfterDot
-import org.jetbrains.kotlin.idea.core.completion.DeclarationDescriptorLookupObject
+import org.jetbrains.kotlin.idea.core.completion.DeclarationLookupObject
 import org.jetbrains.kotlin.idea.util.IdeDescriptorRenderers
 import org.jetbrains.kotlin.idea.util.ShortenReferences
+import org.jetbrains.kotlin.name.FqNameUnsafe
 import org.jetbrains.kotlin.psi.JetFile
 import org.jetbrains.kotlin.psi.JetNameReferenceExpression
+import org.jetbrains.kotlin.renderer.render
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
@@ -82,11 +84,13 @@ object KotlinClassInsertHandler : BaseDeclarationInsertHandler() {
     }
 
     private fun qualifiedNameToInsert(item: LookupElement): String {
-        val lookupObject = item.getObject()
-        return when (lookupObject) {
-            is DeclarationDescriptorLookupObject -> IdeDescriptorRenderers.SOURCE_CODE.renderClassifierName(lookupObject.descriptor as ClassDescriptor)
-            is PsiClass -> lookupObject.getQualifiedName()!!
-            else -> error("Unknown object in LookupElement with KotlinClassInsertHandler: $lookupObject")
+        val lookupObject = item.getObject() as DeclarationLookupObject
+        if (lookupObject.descriptor != null) {
+            return IdeDescriptorRenderers.SOURCE_CODE.renderClassifierName(lookupObject.descriptor as ClassDescriptor)
+        }
+        else {
+            val qualifiedName = (lookupObject.psiElement as PsiClass).getQualifiedName()!!
+            return if (FqNameUnsafe.isValid(qualifiedName)) FqNameUnsafe(qualifiedName).render() else qualifiedName
         }
     }
 }
