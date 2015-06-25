@@ -156,7 +156,7 @@ public class GenerationState {
         ClassBuilderFactory interceptedBuilderFactory = new BuilderFactoryForDuplicateSignatureDiagnostics(
                 builderFactory, this.bindingContext, diagnostics);
 
-        interceptedBuilderFactory = new BuilderFactoryForDuplicateClassNameDiagnostics(interceptedBuilderFactory, bindingContext, diagnostics);
+        interceptedBuilderFactory = new BuilderFactoryForDuplicateClassNameDiagnostics(interceptedBuilderFactory, diagnostics);
 
         Collection<ClassBuilderInterceptorExtension> interceptExtensions =
                 ClassBuilderInterceptorExtension.Companion.getInstances(project);

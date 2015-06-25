@@ -36,24 +36,23 @@ import java.util.*
 
 class BuilderFactoryForDuplicateClassNameDiagnostics(
         builderFactory: ClassBuilderFactory,
-        bindingContext: BindingContext,
         private val diagnostics: DiagnosticSink
 ) : ClassNameCollectionClassBuilderFactory(builderFactory) {
 
     private val className = hashMapOf<String, JvmDeclarationOrigin> ()
 
-    override fun handleClashingName(internalName: String, origin: JvmDeclarationOrigin) {
-//        val another = className.getOrPut(internalName, { origin })
-//        if (origin.descriptor != another.descriptor) {
-//            if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE || another.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
-//                if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
-//                    diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(another.element, internalName))
-//                } else {
-//                    diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(another.element, internalName))
-//                }
-//            } else {
-//                diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(origin.element, internalName))
-//            }
-//        }
+    override fun handleClashingNames(internalName: String, origin: JvmDeclarationOrigin) {
+        val another = className.getOrPut(internalName, { origin })
+        if (origin.descriptor != another.descriptor) {
+            if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE || another.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
+                if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
+                    diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(another.element, internalName))
+                } else {
+                    diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(another.element, internalName))
+                }
+            } else {
+                diagnostics.report(ErrorsJvm.CONFLICTING_CLASS_NAMES.on(origin.element, internalName))
+            }
+        }
     }
 }

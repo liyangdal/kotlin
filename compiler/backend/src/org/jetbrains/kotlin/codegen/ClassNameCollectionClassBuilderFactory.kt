@@ -30,7 +30,7 @@ public abstract class ClassNameCollectionClassBuilderFactory(
 
 ) : ClassBuilderFactory by delegate {
 
-    protected abstract fun handleClashingName(internalName: String, origin: JvmDeclarationOrigin)
+    protected abstract fun handleClashingNames(internalName: String, origin: JvmDeclarationOrigin)
 
     override fun newClassBuilder(origin: JvmDeclarationOrigin): ClassNameCollectionClassBuilder {
         return ClassNameCollectionClassBuilder(origin, delegate.newClassBuilder(origin))
@@ -59,9 +59,14 @@ public abstract class ClassNameCollectionClassBuilderFactory(
 
         override fun defineClass(origin: PsiElement?, version: Int, access: Int, name: String, signature: String?, superName: String, interfaces: Array<out String>) {
             classInternalName = name
-            handleClashingName(name, classCreatedFor)
             super.defineClass(origin, version, access, name, signature, superName, interfaces)
         }
 
+        override fun done() {
+            if (classInternalName != null) {
+                handleClashingNames(classInternalName!!, classCreatedFor)
+            }
+            super.done()
+        }
     }
 }
