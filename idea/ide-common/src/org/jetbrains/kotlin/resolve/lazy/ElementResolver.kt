@@ -347,8 +347,6 @@ public abstract class ElementResolver protected constructor(
     }
 
     private fun functionAdditionalResolve(resolveSession: ResolveSession, namedFunction: JetNamedFunction, file: JetFile, statementFilter: StatementFilter): BindingTrace {
-        assert(statementFilter != StatementFilter.NONE)
-
         val trace = createDelegationTrace(namedFunction)
 
         val scope = resolveSession.getScopeProvider().getResolutionScopeForDeclaration(namedFunction)
