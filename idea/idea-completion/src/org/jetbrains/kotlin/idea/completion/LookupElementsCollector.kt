@@ -16,14 +16,12 @@
 
 package org.jetbrains.kotlin.idea.completion
 
-import com.intellij.codeInsight.completion.CompletionParameters
-import com.intellij.codeInsight.completion.CompletionResultSet
-import com.intellij.codeInsight.completion.InsertionContext
-import com.intellij.codeInsight.completion.PrefixMatcher
+import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementDecorator
 import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.openapi.util.TextRange
+import com.intellij.patterns.ElementPattern
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
@@ -32,26 +30,38 @@ import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.ResolutionFacade
 import org.jetbrains.kotlin.idea.completion.handlers.*
 import java.util.ArrayList
+import java.util.LinkedHashMap
 
 class LookupElementsCollector(
-        private val prefixMatcher: PrefixMatcher,
+        private val defaultPrefixMatcher: PrefixMatcher,
         private val completionParameters: CompletionParameters,
+        resultSet: CompletionResultSet,
         private val resolutionFacade: ResolutionFacade,
         private val lookupElementFactory: LookupElementFactory,
-        private val inDescriptor: DeclarationDescriptor?,
+        private val inDescriptor: DeclarationDescriptor,
         private val context: LookupElementsCollector.Context
 ) {
     public enum class Context {
-        NORMAL
-        STRING_TEMPLATE_AFTER_DOLLAR
+        NORMAL,
+        STRING_TEMPLATE_AFTER_DOLLAR,
         INFIX_CALL
     }
 
-    private val elements = ArrayList<LookupElement>()
+    private val elements = LinkedHashMap<PrefixMatcher, ArrayList<LookupElement>>()
 
-    public fun flushToResultSet(resultSet: CompletionResultSet) {
+    private val defaultResultSet = resultSet
+            .withPrefixMatcher(defaultPrefixMatcher)
+            .addKotlinSorting(completionParameters)
+
+    public fun flushToResultSet() {
         if (!elements.isEmpty()) {
-            resultSet.addAllElements(elements)
+            for ((prefixMatcher, elements) in elements) {
+                val resultSet = if (prefixMatcher == defaultPrefixMatcher)
+                    defaultResultSet
+                else
+                    defaultResultSet.withPrefixMatcher(prefixMatcher)
+                resultSet.addAllElements(elements)
+            }
             elements.clear()
             isResultEmpty = false
         }
@@ -59,6 +69,8 @@ class LookupElementsCollector(
 
     public var isResultEmpty: Boolean = true
         private set
+
+    public var suppressItemSelectionByCharsOnTyping: Boolean = false
 
     public fun addDescriptorElements(descriptors: Iterable<DeclarationDescriptor>,
                                      suppressAutoInsertion: Boolean, // auto-insertion suppression is used for elements that require adding an import
@@ -69,7 +81,7 @@ class LookupElementsCollector(
         }
     }
 
-    private fun addDescriptorElements(descriptor: DeclarationDescriptor, suppressAutoInsertion: Boolean, withReceiverCast: Boolean) {
+    public fun addDescriptorElements(descriptor: DeclarationDescriptor, suppressAutoInsertion: Boolean, withReceiverCast: Boolean = false) {
         run {
             var lookupElement = lookupElementFactory.createLookupElement(descriptor, true)
 
@@ -135,9 +147,9 @@ class LookupElementsCollector(
         }
     }
 
-    public fun addElement(element: LookupElement) {
+    public fun addElement(element: LookupElement, prefixMatcher: PrefixMatcher = defaultPrefixMatcher) {
         if (prefixMatcher.prefixMatches(element)) {
-            elements.add(object: LookupElementDecorator<LookupElement>(element) {
+            val decorated = object : LookupElementDecorator<LookupElement>(element) {
                 override fun handleInsert(context: InsertionContext) {
                     getDelegate().handleInsert(context)
 
@@ -155,7 +167,13 @@ class LookupElementsCollector(
                     }
 
                 }
-            })
+            }
+
+            if (suppressItemSelectionByCharsOnTyping) {
+                decorated.putUserData(KotlinCompletionCharFilter.SUPPRESS_ITEM_SELECTION_BY_CHARS_ON_TYPING, Unit)
+            }
+
+            elements.getOrPut(prefixMatcher) { ArrayList() }.add(decorated)
         }
     }
 
@@ -177,5 +195,13 @@ class LookupElementsCollector(
 
     public fun addElements(elements: Iterable<LookupElement>) {
         elements.forEach { addElement(it) }
+    }
+
+    public fun advertiseSecondCompletion() {
+        JavaCompletionContributor.advertiseSecondCompletion(completionParameters.getOriginalFile().getProject(), defaultResultSet)
+    }
+
+    public fun restartCompletionOnPrefixChange(prefixCondition: ElementPattern<String>) {
+        defaultResultSet.restartCompletionOnPrefixChange(prefixCondition)
     }
 }

@@ -22,16 +22,18 @@ import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.util.Key
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.StandardPatterns
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.util.PlatformIcons
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.idea.JetIcons
 import org.jetbrains.kotlin.idea.caches.resolve.ResolutionFacade
 import org.jetbrains.kotlin.idea.completion.handlers.CastReceiverInsertHandler
 import org.jetbrains.kotlin.idea.completion.handlers.WithTailInsertHandler
 import org.jetbrains.kotlin.idea.util.*
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.*
-import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 import org.jetbrains.kotlin.renderer.DescriptorRenderer
 import org.jetbrains.kotlin.renderer.render
@@ -308,10 +310,9 @@ fun breakOrContinueExpressionItems(position: JetElement, breakOrContinue: String
 
 fun LookupElementFactory.createBackingFieldLookupElement(
         property: PropertyDescriptor,
-        inDescriptor: DeclarationDescriptor?,
+        inDescriptor: DeclarationDescriptor,
         resolutionFacade: ResolutionFacade
 ): LookupElement? {
-    if (inDescriptor == null) return null // no backing field accessible
     val insideAccessor = inDescriptor is PropertyAccessorDescriptor && inDescriptor.getCorrespondingProperty() == property
     if (!insideAccessor) {
         val container = property.getContainingDeclaration()
@@ -337,6 +338,51 @@ fun LookupElementFactory.createBackingFieldLookupElement(
             presentation.setIcon(PlatformIcons.FIELD_ICON) //TODO: special icon
         }
     }.assignPriority(ItemPriority.BACKING_FIELD)
+}
+
+fun LookupElementFactory.createLookupElementForType(type: JetType): LookupElement? {
+    if (type.isError()) return null
+
+    if (KotlinBuiltIns.isExactFunctionOrExtensionFunctionType(type)) {
+        val text = IdeDescriptorRenderers.SOURCE_CODE_SHORT_NAMES_IN_TYPES.renderType(type)
+        val baseLookupElement = LookupElementBuilder.create(text).setIcon(JetIcons.LAMBDA)
+        return BaseTypeLookupElement(type, baseLookupElement)
+    }
+    else {
+        val classifier = type.getConstructor().getDeclarationDescriptor() ?: return null
+        val baseLookupElement = createLookupElement(classifier, false, qualifyNestedClasses = true, includeClassTypeArguments = false)
+
+        val itemText = IdeDescriptorRenderers.SOURCE_CODE_SHORT_NAMES_IN_TYPES.renderType(type)
+
+        return object : BaseTypeLookupElement(type, baseLookupElement) {
+            override fun renderElement(presentation: LookupElementPresentation) {
+                super.renderElement(presentation)
+                presentation.setItemText(itemText)
+            }
+        }
+    }
+}
+
+private open class BaseTypeLookupElement(type: JetType, baseLookupElement: LookupElement) : LookupElementDecorator<LookupElement>(baseLookupElement) {
+    private val fullText = IdeDescriptorRenderers.SOURCE_CODE.renderType(type)
+
+    override fun equals(other: Any?) = other is BaseTypeLookupElement && fullText == other.fullText
+    override fun hashCode() = fullText.hashCode()
+
+    override fun renderElement(presentation: LookupElementPresentation) {
+        getDelegate().renderElement(presentation)
+    }
+
+    override fun handleInsert(context: InsertionContext) {
+        context.getDocument().replaceString(context.getStartOffset(), context.getTailOffset(), fullText)
+        context.setTailOffset(context.getStartOffset() + fullText.length())
+        shortenReferences(context, context.getStartOffset(), context.getTailOffset())
+    }
+}
+
+fun shortenReferences(context: InsertionContext, startOffset: Int, endOffset: Int) {
+    PsiDocumentManager.getInstance(context.getProject()).commitAllDocuments();
+    ShortenReferences.DEFAULT.process(context.getFile() as JetFile, startOffset, endOffset)
 }
 
 fun <T> ElementPattern<T>.and(rhs: ElementPattern<T>) = StandardPatterns.and(this, rhs)
