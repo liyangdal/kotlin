@@ -71,6 +71,13 @@ public class PackagePartClassUtils {
             }
         }
 
+        if (!fileName.isEmpty()) {
+            char c = fileName.charAt(0);
+            if ('a' <= c && c <= 'z') {
+                fileName = Character.toUpperCase(fileName.charAt(0)) + fileName.substring(1);
+            }
+        }
+
         return facadeFqName.parent().child(Name.identifier(replaceSpecialSymbols(fileName)));
 
         // path hashCode to prevent same name / different path collision
