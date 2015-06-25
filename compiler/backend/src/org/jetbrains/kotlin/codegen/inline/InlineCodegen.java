@@ -192,10 +192,10 @@ public class InlineCodegen extends CallGenerator {
                     (DeserializedSimpleFunctionDescriptor) functionDescriptor);
 
             VirtualFile file = InlineCodegenUtil.getVirtualFileForCallable(containerClassId, state);
-            if (functionDescriptor.getContainingDeclaration() instanceof PackageFragmentDescriptor) {
-                /*use facade class*/
-                containerClassId = PackageClassUtils.getPackageClassId(containerClassId.getPackageFqName());
-            }
+            //if (functionDescriptor.getContainingDeclaration() instanceof PackageFragmentDescriptor) {
+            //    /*use facade class*/
+            //    containerClassId = PackageClassUtils.getPackageClassId(containerClassId.getPackageFqName());
+            //}
             nodeAndSMAP = InlineCodegenUtil.getMethodNode(file.contentsToByteArray(),
                                                           asmMethod.getName(),
                                                           asmMethod.getDescriptor(),
@@ -337,7 +337,8 @@ public class InlineCodegen extends CallGenerator {
         FakeMemberCodegen parentCodegen =
                 new FakeMemberCodegen(codegen.getParentCodegen(), expression,
                                       (FieldOwnerContext) context.getParentContext(),
-                                      isLambda ? codegen.getParentCodegen().getClassName() : typeMapper.mapOwner(descriptor, false).getInternalName());
+                                      isLambda ? codegen.getParentCodegen().getClassName()
+                                               : typeMapper.mapOwner(descriptor, true /*TODO: false, migration*/).getInternalName());
 
         FunctionGenerationStrategy strategy =
                 expression instanceof JetCallableReferenceExpression ?
