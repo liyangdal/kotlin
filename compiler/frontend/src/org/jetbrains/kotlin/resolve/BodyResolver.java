@@ -394,15 +394,37 @@ public class BodyResolver {
             trace.report(SUPERTYPES_FOR_ANNOTATION_CLASS.on(jetClass.getDelegationSpecifierList()));
         }
 
-        Set<TypeConstructor> parentEnum =
-                jetClass instanceof JetEnumEntry
-                ? Collections.singleton(((ClassDescriptor) descriptor.getContainingDeclaration()).getTypeConstructor())
-                : Collections.<TypeConstructor>emptySet();
-
         if (primaryConstructorDelegationCall[0] != null && primaryConstructor != null) {
             recordConstructorDelegationCall(trace, primaryConstructor, primaryConstructorDelegationCall[0]);
         }
-        checkSupertypeList(descriptor, supertypes, parentEnum);
+
+        checkSupertypeList(descriptor, supertypes, jetClass);
+    }
+
+    // Returns a set of enum or sealed types of which supertypeOwner is an entry or a member
+    @NotNull
+    private static Set<TypeConstructor> getAllowedFinalSupertypes(
+            @NotNull ClassDescriptor descriptor,
+            @NotNull JetClassOrObject jetClass
+    ) {
+        Set<TypeConstructor> parentEnumOrSealed;
+        if (jetClass instanceof JetEnumEntry) {
+            parentEnumOrSealed = Collections.singleton(((ClassDescriptor) descriptor.getContainingDeclaration()).getTypeConstructor());
+        }
+        else {
+            parentEnumOrSealed = Collections.emptySet();
+            ClassDescriptor currentDescriptor = descriptor;
+            while (currentDescriptor.getContainingDeclaration() instanceof ClassDescriptor) {
+                currentDescriptor = (ClassDescriptor) currentDescriptor.getContainingDeclaration();
+                if (currentDescriptor.getModality() == Modality.SEALED) {
+                    if (parentEnumOrSealed.isEmpty()) {
+                        parentEnumOrSealed = new HashSet<TypeConstructor>();
+                    }
+                    parentEnumOrSealed.add(currentDescriptor.getTypeConstructor());
+                }
+            }
+        }
+        return parentEnumOrSealed;
     }
 
     private static void recordConstructorDelegationCall(
@@ -414,12 +436,12 @@ public class BodyResolver {
         trace.record(CONSTRUCTOR_RESOLVED_DELEGATION_CALL, constructor, (ResolvedCall<ConstructorDescriptor>) call);
     }
 
-    // allowedFinalSupertypes typically contains a enum type of which supertypeOwner is an entry
     private void checkSupertypeList(
             @NotNull ClassDescriptor supertypeOwner,
             @NotNull Map<JetTypeReference, JetType> supertypes,
-            @NotNull Set<TypeConstructor> allowedFinalSupertypes
+            @NotNull JetClassOrObject jetClass
     ) {
+        Set<TypeConstructor> allowedFinalSupertypes = getAllowedFinalSupertypes(supertypeOwner, jetClass);
         Set<TypeConstructor> typeConstructors = Sets.newHashSet();
         boolean classAppeared = false;
         for (Map.Entry<JetTypeReference, JetType> entry : supertypes.entrySet()) {
@@ -464,7 +486,21 @@ public class BodyResolver {
                 trace.report(SINGLETON_IN_SUPERTYPE.on(typeReference));
             }
             else if (constructor.isFinal() && !allowedFinalSupertypes.contains(constructor)) {
-                trace.report(FINAL_SUPERTYPE.on(typeReference));
+                if (classDescriptor.getModality() == Modality.SEALED) {
+                    DeclarationDescriptor containingDescriptor = supertypeOwner.getContainingDeclaration();
+                    while (containingDescriptor != null && containingDescriptor != classDescriptor) {
+                        containingDescriptor = containingDescriptor.getContainingDeclaration();
+                    }
+                    if (containingDescriptor == null) {
+                        trace.report(SEALED_SUPERTYPE.on(typeReference));
+                    }
+                    else {
+                        trace.report(SEALED_SUPERTYPE_IN_LOCAL_CLASS.on(typeReference));
+                    }
+                }
+                else {
+                    trace.report(FINAL_SUPERTYPE.on(typeReference));
+                }
             }
         }
     }
