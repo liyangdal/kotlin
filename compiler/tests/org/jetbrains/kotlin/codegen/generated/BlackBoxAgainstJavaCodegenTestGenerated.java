@@ -433,9 +433,9 @@ public class BlackBoxAgainstJavaCodegenTestGenerated extends AbstractBlackBoxCod
             JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxAgainstJava/platformTypes"), Pattern.compile("^(.+)\\.kt$"), true);
         }
 
-        @TestMetadata("GenericUnit.kt")
-        public void testGenericUnit() throws Exception {
-            String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxAgainstJava/platformTypes/GenericUnit.kt");
+        @TestMetadata("GenericUnit1.kt")
+        public void testGenericUnit1() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxAgainstJava/platformTypes/GenericUnit1.kt");
             doTestAgainstJava(fileName);
         }
     }
