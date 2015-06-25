@@ -353,18 +353,18 @@ class StringTest {
 
 
     test fun split() {
-        assertEquals(listOf(""), "".splitBy(";"))
+        assertEquals(listOf(""), "".split(";"))
         assertEquals(listOf("test"), "test".split(*charArray()), "empty list of delimiters, none matched -> entire string returned")
-        assertEquals(listOf("test"), "test".splitBy(*array<String>()), "empty list of delimiters, none matched -> entire string returned")
+        assertEquals(listOf("test"), "test".split(*array<String>()), "empty list of delimiters, none matched -> entire string returned")
 
         assertEquals(listOf("abc", "def", "123;456"), "abc;def,123;456".split(';', ',', limit = 3))
-        assertEquals(listOf("abc", "def", "123", "456"), "abc<BR>def<br>123<bR>456".splitBy("<BR>", ignoreCase = true))
+        assertEquals(listOf("abc", "def", "123", "456"), "abc<BR>def<br>123<bR>456".split("<BR>", ignoreCase = true))
 
-        assertEquals(listOf("abc", "def", "123", "456"), "abc=-def==123=456".splitBy("==", "=-", "="))
+        assertEquals(listOf("abc", "def", "123", "456"), "abc=-def==123=456".split("==", "=-", "="))
 
-        assertEquals(listOf("", "a", "b", "c", ""), "abc".splitBy(""))
-        assertEquals(listOf("", "a", "b", "b", "a", ""), "abba".splitBy("", "a"))
-        assertEquals(listOf("", "", "b", "b", "", ""), "abba".splitBy("a", ""))
+        assertEquals(listOf("", "a", "b", "c", ""), "abc".split(""))
+        assertEquals(listOf("", "a", "b", "b", "a", ""), "abba".split("", "a"))
+        assertEquals(listOf("", "", "b", "b", "", ""), "abba".split("a", ""))
     }
 
     test fun splitToLines() {
@@ -551,10 +551,10 @@ class StringTest {
         // doesn't pass in Rhino JS
         // assertEquals("schrodinger", "schrÖdinger".replaceFirst('ö', 'o', ignoreCase = true))
 
-        assertEquals("Abba${'$'}", input.replaceFirstLiteral("bA", "$"))
-        assertEquals("Ab${'$'}bA", input.replaceFirstLiteral("bA", "$", ignoreCase = true))
+        assertEquals("Abba${'$'}", input.replaceFirst("bA", "$"))
+        assertEquals("Ab${'$'}bA", input.replaceFirst("bA", "$", ignoreCase = true))
 
-        assertEquals("-test", "test".replaceFirstLiteral("", "-"))
+        assertEquals("-test", "test".replaceFirst("", "-"))
     }
 
 
