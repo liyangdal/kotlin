@@ -29,7 +29,7 @@ fun box(): String {
 //+ 1 objectOnCallSite.1.kt
 //objectOnCallSite_1
 //+ 2 objectOnCallSite.2.kt
-//builders/BuildersPackage
+//builders/objectOnCallSite_2
 //*L
 //1#1,36:1
 //4#2:37

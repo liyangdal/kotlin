@@ -17,7 +17,7 @@ fun box(): String {
 //+ 1 assertion.1.kt
 //assertion_1
 //+ 2 assertion.2.kt
-//test/TestPackage
+//test/assertion_2
 //*L
 //1#1,25:1
 //15#2,7:26

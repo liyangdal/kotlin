@@ -17,7 +17,7 @@ fun box(): String {
 //+ 1 inlineIterator.1.kt
 //inlineIterator_1
 //+ 2 inlineIterator.2.kt
-//zzz/ZzzPackage
+//zzz/inlineIterator_2
 //*L
 //1#1,24:1
 //5#2:25

@@ -24,7 +24,7 @@ fun box(): String {
 //+ 1 object.1.kt
 //object_1
 //+ 2 object.2.kt
-//builders/BuildersPackage
+//builders/object_2
 //*L
 //1#1,45:1
 //4#2,5:46

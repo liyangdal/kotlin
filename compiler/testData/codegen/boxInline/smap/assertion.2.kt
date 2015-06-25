@@ -28,7 +28,7 @@ public inline fun massert(value: Boolean, message: Any = "Assertion failed") {
 //*S Kotlin
 //*F
 //+ 1 assertion.2.kt
-//test/TestPackage
+//test/assertion_2
 //*L
 //1#1,34:1
 //*E

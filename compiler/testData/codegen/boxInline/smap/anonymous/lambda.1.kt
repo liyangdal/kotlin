@@ -25,7 +25,7 @@ fun box(): String {
 //+ 1 lambda.1.kt
 //lambda_1
 //+ 2 lambda.2.kt
-//builders/BuildersPackage
+//builders/lambda_2
 //*L
 //1#1,46:1
 //4#2:47
