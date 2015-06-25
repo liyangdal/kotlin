@@ -43,7 +43,7 @@ class BuilderFactoryForDuplicateClassNameDiagnostics(
 
     override fun handleClashingNames(internalName: String, origin: JvmDeclarationOrigin) {
         val another = className.getOrPut(internalName, { origin })
-        if (origin.descriptor != another.descriptor) {
+        if (origin.element != another.element) {
             if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE || another.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
                 if (origin.originKind == JvmDeclarationOriginKind.PACKAGE_FACADE) {
                     reportError(another, internalName)
