@@ -119,7 +119,7 @@ public class ComponentStorage(val myId: String) : ValueResolver {
         registry.addAll(implicits)
 
         // instantiate and inject properties
-        for (value in (descriptors + implicits).map { it.getValue() }) {
+        for (value in (descriptors.filterNot { it is InstanceComponentDescriptor } + implicits).map { it.getValue() }) {
             injectProperties(value, context)
         }
     }
