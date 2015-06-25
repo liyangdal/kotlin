@@ -44,8 +44,8 @@ import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 public abstract class ElementResolver protected constructor(
         public val resolveSession: ResolveSession
 ) {
-    protected open fun getElementAdditionalResolve(jetElement: JetElement): BindingTrace {
-        return performElementAdditionalResolve(jetElement, jetElement, BodyResolveMode.FULL)
+    protected open fun getElementAdditionalResolve(elementOfAdditionalResolve: JetElement): BindingTrace {
+        return performElementAdditionalResolve(elementOfAdditionalResolve, StatementFilter.NONE, BodyResolveMode.FULL)
     }
 
     public open fun hasElementAdditionalResolveCached(jetElement: JetElement): Boolean = false
@@ -60,8 +60,14 @@ public abstract class ElementResolver protected constructor(
 
         if (elementOfAdditionalResolve != null) {
             if (elementOfAdditionalResolve !is JetParameter) {
-                if (bodyResolveMode != BodyResolveMode.FULL && !hasElementAdditionalResolveCached(elementOfAdditionalResolve)) {
-                    return performElementAdditionalResolve(elementOfAdditionalResolve, jetElement, bodyResolveMode).getBindingContext()
+                val statementFilter = if (bodyResolveMode != BodyResolveMode.FULL && elementOfAdditionalResolve is JetDeclaration)
+                    PartialBodyResolveFilter(jetElement, elementOfAdditionalResolve, probablyNothingCallableNames(), bodyResolveMode == BodyResolveMode.PARTIAL_FOR_COMPLETION)
+                else
+                    StatementFilter.NONE
+
+                if ((statementFilter != StatementFilter.NONE || (bodyResolveMode != BodyResolveMode.FULL && elementOfAdditionalResolve is JetCodeFragment)) &&
+                        !hasElementAdditionalResolveCached(elementOfAdditionalResolve)) {
+                    return performElementAdditionalResolve(elementOfAdditionalResolve, statementFilter, bodyResolveMode).getBindingContext()
                 }
 
                 return getElementAdditionalResolve(elementOfAdditionalResolve).getBindingContext()
@@ -109,13 +115,8 @@ public abstract class ElementResolver protected constructor(
         return elementOfAdditionalResolve
     }
 
-    protected fun performElementAdditionalResolve(resolveElement: JetElement, contextElement: JetElement, bodyResolveMode: BodyResolveMode): BindingTrace {
+    protected fun performElementAdditionalResolve(resolveElement: JetElement, statementFilter: StatementFilter, bodyResolveMode: BodyResolveMode): BindingTrace {
         val file = resolveElement.getContainingJetFile()
-
-        val statementFilter = if (bodyResolveMode != BodyResolveMode.FULL && resolveElement is JetDeclaration)
-            PartialBodyResolveFilter(contextElement, resolveElement, probablyNothingCallableNames(), bodyResolveMode == BodyResolveMode.PARTIAL_FOR_COMPLETION)
-        else
-            StatementFilter.NONE
 
         val trace: BindingTrace = when (resolveElement) {
             is JetNamedFunction -> functionAdditionalResolve(resolveSession, resolveElement, file, statementFilter)

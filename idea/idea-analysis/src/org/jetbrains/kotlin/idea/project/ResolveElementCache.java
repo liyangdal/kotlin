@@ -29,10 +29,7 @@ import org.jetbrains.kotlin.idea.stubindex.JetProbablyNothingPropertyShortNameIn
 import org.jetbrains.kotlin.psi.JetElement;
 import org.jetbrains.kotlin.psi.JetFile;
 import org.jetbrains.kotlin.psi.JetNamedFunction;
-import org.jetbrains.kotlin.resolve.AdditionalCheckerProvider;
-import org.jetbrains.kotlin.resolve.BindingTrace;
-import org.jetbrains.kotlin.resolve.DelegatingBindingTrace;
-import org.jetbrains.kotlin.resolve.ResolveTaskManager;
+import org.jetbrains.kotlin.resolve.*;
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode;
 import org.jetbrains.kotlin.resolve.lazy.ElementResolver;
 import org.jetbrains.kotlin.resolve.lazy.ProbablyNothingCallableNames;
@@ -64,7 +61,7 @@ public class ResolveElementCache extends ElementResolver implements ResolveTaskM
                                         manager.createSoftlyRetainedMemoizedFunction(new Function1<JetElement, BindingTrace>() {
                                             @Override
                                             public BindingTrace invoke(JetElement jetElement) {
-                                                return performElementAdditionalResolve(jetElement, jetElement, BodyResolveMode.FULL);
+                                                return performElementAdditionalResolve(jetElement, StatementFilter.NONE, BodyResolveMode.FULL);
                                             }
                                         });
 
@@ -78,8 +75,8 @@ public class ResolveElementCache extends ElementResolver implements ResolveTaskM
 
     @NotNull
     @Override
-    protected BindingTrace getElementAdditionalResolve(@NotNull JetElement jetElement) {
-        return additionalResolveCache.getValue().invoke(jetElement);
+    protected BindingTrace getElementAdditionalResolve(@NotNull JetElement elementOfAdditionalResolve) {
+        return additionalResolveCache.getValue().invoke(elementOfAdditionalResolve);
     }
 
     @Override
