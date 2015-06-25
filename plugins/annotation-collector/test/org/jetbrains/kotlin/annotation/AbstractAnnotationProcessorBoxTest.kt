@@ -43,7 +43,7 @@ public abstract class AbstractAnnotationProcessorBoxTest : CodegenTestCase() {
         loadFileByFullPath(fileName)
         CodegenTestUtil.generateFiles(myEnvironment, myFiles)
 
-        val actualAnnotations = collectorExtension.stringWriter.toString()
+        val actualAnnotations = JetTestUtils.replaceHashWithStar(collectorExtension.stringWriter.toString())
         val expectedAnnotationsFile = File(path + "annotations.txt")
 
         JetTestUtils.assertEqualsToFile(expectedAnnotationsFile, actualAnnotations)
