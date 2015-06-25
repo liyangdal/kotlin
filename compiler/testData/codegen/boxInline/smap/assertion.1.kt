@@ -15,9 +15,9 @@ fun box(): String {
 //*S Kotlin
 //*F
 //+ 1 assertion.1.kt
-//assertion_1
+//Assertion_1
 //+ 2 assertion.2.kt
-//test/assertion_2
+//test/Assertion_2
 //*L
 //1#1,25:1
 //15#2,7:26

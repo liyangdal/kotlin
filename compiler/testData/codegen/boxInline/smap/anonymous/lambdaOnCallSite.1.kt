@@ -25,9 +25,9 @@ fun box(): String {
 //*S Kotlin
 //*F
 //+ 1 lambdaOnCallSite.1.kt
-//lambdaOnCallSite_1
+//LambdaOnCallSite_1
 //+ 2 lambdaOnCallSite.2.kt
-//builders/lambdaOnCallSite_2
+//builders/LambdaOnCallSite_2
 //*L
 //1#1,34:1
 //4#2:35
