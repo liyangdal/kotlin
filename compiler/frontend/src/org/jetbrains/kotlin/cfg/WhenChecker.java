@@ -114,8 +114,8 @@ public final class WhenChecker {
                 ClassDescriptor memberClassDescriptor = (ClassDescriptor) descriptor;
                 if (DescriptorUtils.isDirectSubclass(memberClassDescriptor, baseDescriptor)) {
                     subclasses.add(memberClassDescriptor);
-                    collectNestedSubclasses(baseDescriptor, memberClassDescriptor, subclasses);
                 }
+                collectNestedSubclasses(baseDescriptor, memberClassDescriptor, subclasses);
             }
         }
     }

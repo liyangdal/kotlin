@@ -1,5 +1,6 @@
 package
 
+internal fun barWithoutElse(/*0*/ s: Sealed): kotlin.Int
 internal fun foo(/*0*/ s: Sealed): kotlin.Int
 internal fun fooWithElse(/*0*/ s: Sealed): kotlin.Int
 internal fun fooWithoutElse(/*0*/ s: Sealed): kotlin.Int

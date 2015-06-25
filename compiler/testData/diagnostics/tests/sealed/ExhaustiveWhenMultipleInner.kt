@@ -37,4 +37,11 @@ fun fooWithoutElse(s: Sealed) = <!NO_ELSE_IN_WHEN!>when<!>(s) {
     is Sealed.NonFirst.NonSecond.NonThird.Fifth -> 10
 }
 
+fun barWithoutElse(s: Sealed) = <!NO_ELSE_IN_WHEN!>when<!>(s) {
+    Sealed.First -> 1
+    is Sealed.NonFirst -> 2
+    Sealed.NonFirst.Second -> 4
+    is Sealed.NonFirst.NonSecond.NonThird -> 8
+    is Sealed.NonFirst.NonSecond.NonThird.Fifth -> 10
+}
 
